@@ -11,12 +11,15 @@ const getWhatToThrow = (err) => (
     : err
 )
 
-module.exports = function Qiwi(token, _proxy = null) {
+module.exports = function Qiwi({
+  token,
+  proxy: _proxy,
+  throwErrIfNoProxy: _throwErrIfNoProxy,
+}) {
   this.proxy = _proxy
-
+  this.throwErrIfNoProxy = _throwErrIfNoProxy
   this.apiUri = 'https://edge.qiwi.com'
-
-  const headers = {
+  this.headers = {
     Accept: 'application/json',
     'content-type': 'application/json',
     Authorization: 'Bearer ' + token,
@@ -146,7 +149,7 @@ module.exports = function Qiwi(token, _proxy = null) {
   this.setDefaultAccount = function (wallet, accountAlias) {
     const options = {
       url: `${this.apiUri}/funding-sources/v2/persons/${wallet}/accounts/${accountAlias}`,
-      headers,
+      headers: this.headers,
       body: {
         defaultAccount: true,
       },
@@ -709,9 +712,9 @@ module.exports = function Qiwi(token, _proxy = null) {
   // REQUEST FUNCTIONS
 
   const applyProxyIfProxyToOptions = (opts) => {
-    if (_proxy) {
-      opts.httpAgent = new SocksAgent(_proxy)
-      opts.httpsAgent = new SocksAgent(_proxy)
+    if (this.proxy) {
+      opts.httpAgent = new SocksAgent(this.proxy)
+      opts.httpsAgent = new SocksAgent(this.proxy)
     }
   }
 
@@ -722,7 +725,7 @@ module.exports = function Qiwi(token, _proxy = null) {
   async function get(options) {
     applyProxyIfProxyToOptions(options)
 
-    options.headers = headers
+    options.headers = this.headers
     try {
       const result = await axios.get(options.url, options)
       if (result.data.errorCode != undefined)
@@ -741,7 +744,7 @@ module.exports = function Qiwi(token, _proxy = null) {
   async function post(options) {
     applyProxyIfProxyToOptions(options)
 
-    options.headers = headers
+    options.headers = this.headers
     try {
       const result = await axios.post(options.url, options.body, options)
       if (result.data.errorCode != undefined)
@@ -760,7 +763,7 @@ module.exports = function Qiwi(token, _proxy = null) {
   async function patch(options) {
     applyProxyIfProxyToOptions(options)
 
-    options.headers = headers
+    options.headers = this.headers
     try {
       const result = await axios.patch(options.url, options.body, options)
       if (result.data.errorCode != undefined)
@@ -779,7 +782,7 @@ module.exports = function Qiwi(token, _proxy = null) {
   async function put(options) {
     applyProxyIfProxyToOptions(options)
 
-    options.headers = headers
+    options.headers = this.headers
     try {
       const result = await axios.put(options.url, options.params, options)
       if (result.data.errorCode != undefined)
@@ -798,7 +801,7 @@ module.exports = function Qiwi(token, _proxy = null) {
   async function del(options) {
     applyProxyIfProxyToOptions(options)
 
-    options.headers = headers
+    options.headers = this.headers
     try {
       const result = await axios.delete(options.url, options)
       if (result.data.errorCode != undefined)
