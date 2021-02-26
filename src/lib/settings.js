@@ -4,23 +4,19 @@ const sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 class Settings {
   constructor(path) {
+    this._path = path
+    this._canSave = true
+
     const fileExists = fs.existsSync(path)
 
     if (!fileExists)
       fs.writeFileSync(path, '{}')
 
-    const str = fileExists
-      ? fs.readFileSync(path, { encoding: 'utf8' })
-      : '{}'
-    const json = JSON.parse(str)
-
-    this.data = { ...json }
-    this._path = path
-    this._canSave = true
+    this.loadFromFile()
   }
 
   /**
-   *
+   * Returns the same instance of Settings every time
    * @param {string} path path to the settings file
    * @returns {Settings} Settings instance
    */
@@ -37,7 +33,7 @@ class Settings {
   }
 
   /**
-   * Writes this.data to the file this.path
+   * Writes this.data to the file this._path
    */
   async save() {
     while (!this._canSave)
@@ -55,6 +51,24 @@ class Settings {
 
     this._canSave = true
     return true
+  }
+
+  /**
+   * Loads JSON data from the file this._path to this.data synchronously
+   */
+  loadFromFile() {
+    const str = fs.readFileSync(this._path, { encoding: 'utf8' })
+    const json = JSON.parse(str)
+    this.data = { ...json }
+  }
+
+  /**
+   * Loads JSON data from the file this._path to this.data asynchronously
+   */
+  async loadFromFileAsync() {
+    const str = await fs.promises.readFile(this._path, { encoding: 'utf8' })
+    const json = JSON.parse(str)
+    this.data = { ...json }
   }
 }
 

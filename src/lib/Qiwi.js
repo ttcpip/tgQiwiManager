@@ -1,154 +1,188 @@
-/* eslint-disable func-names */
 /* eslint-disable eqeqeq */
 const SocksAgent = require('socks-proxy-agent')
-const axios = require('axios').default
+const axiosLib = require('axios').default
 
-const getWhatToThrow = (err) => (
-  err.response
-    ? err.response.data
-      ? err.response.data
-      : err.response
-    : err
-)
+function getWhatToThrow(err) {
+  return err
+  // return err.response
+  //   ? err.response.data
+  //     ? err.response.data
+  //     : err.response
+  //   : err
+}
 
-module.exports = function Qiwi({
-  token,
-  proxy: _proxy,
-  throwErrIfNoProxy: _throwErrIfNoProxy,
-}) {
-  this.proxy = _proxy
-  this.throwErrIfNoProxy = _throwErrIfNoProxy
-  this.apiUri = 'https://edge.qiwi.com'
-  this.headers = {
-    Accept: 'application/json',
-    'content-type': 'application/json',
-    Authorization: 'Bearer ' + token,
-  }
-
+class Qiwi {
   /**
-     * Currency codes
-     */
-  this.currencyCode = {
-    RUB: '643',
-    USD: '840',
-    EUR: '978',
-    KZT: '398',
-  }
+   * @param {Object} params
+   *
+   * @param {String} params.token Wallet API token
+   * @param {String} params.wallet Wallet number without plus (+) and with prefix, as example: 79991234567
+   *
+   * @param {Object} params.proxy Proxy for requests
+   * @param {String} params.proxy.host Proxy host (ip)
+   * @param {String} params.proxy.port Proxy port
+   * @param {String} params.proxy.userId Proxy username
+   * @param {String} params.proxy.password Proxy password
+   */
+  constructor(params) {
+    if (!params.token)
+      throw new Error(`params.token is required!`)
+    if (!params.wallet)
+      throw new Error(`params.wallet is required!`)
+    if (!params.proxy)
+      throw new Error(`params.proxy is required!`)
 
-  /**
-     * Allowable recepients
-     */
-  this.recipients = {
-    banks: {
-      alfabank: { id: 464, accountType: 1 },
-      tinkoff: { id: 466, accountType: 1 },
-      ao_otp_bank: { id: 804, accountType: 1 },
-      ao_rosselhozbank: { id: 810, accountType: 5 },
-      russkiy_standard: { id: 815, accountType: 1 },
-      pao_vtb: { id: 816, accountType: 5 },
-      promsvyazbank: { id: 821, accountType: 7 },
-      pao_sberbank: { id: 870, accountType: 5 },
-      renessans_credit: { id: 881, accountType: 1 },
-      moskovskiy_kreditniy_bank: { id: 1134, accountType: 5 },
-    },
-    cards: {
-      visa_sng: 1960,
-      visa_rus: 1963,
-      mastercard_sng: 21012,
-      mastercard_rus: 21013,
-      mir: 31652,
-    },
-    differentServices: {
-      onlime: 674,
-      podari_jizn: 1239,
-    },
-    qiwi: 99,
-  }
+    this.token = params.token
+    this.wallet = params.wallet
+    this.proxy = { type: 5, ...params.proxy }
+    this.apiUri = 'https://edge.qiwi.com'
 
-  /**
-     * Transaction type
-     */
-  this.txnType = {
-    IN: 0,
-    OUT: 1,
-    ALL: 2,
-  }
-
-  /**
-     * Format of receipt file
-     */
-  this.receiptFormat = {
-    Jpeg: 'JPEG',
-    Pdf: 'PDF',
-  }
-
-  /**
-     * Get identification data
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#ident_data
-     * @param {string} wallet Wallet number without plus (+) and with prefix, as example: 79991234567
-     */
-  this.getIdentificationData = function (wallet) {
-    const options = {
-      url: `${this.apiUri}/identification/v1/persons/${wallet}/identification`,
+    this.headers = {
+      Accept: 'application/json',
+      'content-type': 'application/json',
+      Authorization: 'Bearer ' + this.token,
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
     }
 
-    return get(options)
+    this.axios = axiosLib.create({
+      httpAgent: new SocksAgent(this.proxy),
+      httpsAgent: new SocksAgent(this.proxy),
+      headers: this.headers,
+    })
+
+    /**
+     * Currency codes
+     */
+    this.currencyCode = {
+      RUB: 643,
+      USD: 840,
+      EUR: 978,
+      KZT: 398,
+    }
+
+    /**
+     * Allowable recepients
+     */
+    this.recipients = {
+      banks: {
+        alfabank: { id: 464, accountType: 1 },
+        tinkoff: { id: 466, accountType: 1 },
+        ao_otp_bank: { id: 804, accountType: 1 },
+        ao_rosselhozbank: { id: 810, accountType: 5 },
+        russkiy_standard: { id: 815, accountType: 1 },
+        pao_vtb: { id: 816, accountType: 5 },
+        promsvyazbank: { id: 821, accountType: 7 },
+        pao_sberbank: { id: 870, accountType: 5 },
+        renessans_credit: { id: 881, accountType: 1 },
+        moskovskiy_kreditniy_bank: { id: 1134, accountType: 5 },
+      },
+      cards: {
+        visa_sng: 1960,
+        visa_rus: 1963,
+        mastercard_sng: 21012,
+        mastercard_rus: 21013,
+        mir: 31652,
+      },
+      differentServices: {
+        onlime: 674,
+        podari_jizn: 1239,
+      },
+      qiwi: 99,
+    }
+
+    /**
+     * Transaction type
+     */
+    this.txnType = {
+      IN: 0,
+      OUT: 1,
+      ALL: 2,
+    }
+
+    /**
+     * Format of receipt file
+     */
+    this.receiptFormat = {
+      Jpeg: 'JPEG',
+      Pdf: 'PDF',
+    }
+  }
+
+  // #region Top level methods
+  async getRubAccBalance() {
+    const { accounts } = await this.getAccounts()
+
+    const rubAcc = accounts.find((acc) => acc.currency === this.currencyCode.RUB)
+    if (!rubAcc)
+      throw new Error(`No rub account found`)
+
+    const rubs = parseFloat(rubAcc.balance.amount)
+    return rubs
+  }
+
+  // #region Raw qiwi api methods
+  /**
+   * Get identification data
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#ident_data
+   */
+  getIdentificationData() {
+    const options = {
+      url: `${this.apiUri}/identification/v1/persons/${this.wallet}/identification`,
+    }
+
+    return this.get(options)
   }
 
   /**
-     * Identify wallet
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#ident
-     * @param {string} wallet Wallet number without plus (+) and with prefix, as example: 79991234567
-     * @param {{birthDate:string, firstName:string, middleName:string, lastName:string, passport:string, inn:string, snils:string, oms:string}} requestOptions
-     */
-  this.identifyWallet = function (wallet, requestOptions) {
+   * Identify wallet
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#ident
+   * @param {{birthDate:string, firstName:string, middleName:string, lastName:string, passport:string, inn:string, snils:string, oms:string}} requestOptions
+   */
+  identifyWallet(requestOptions) {
     const options = {
-      url: `${this.apiUri}/identification/v1/persons/${wallet}/identification`,
+      url: `${this.apiUri}/identification/v1/persons/${this.wallet}/identification`,
       body: requestOptions,
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Get accounts of wallet
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#balances_list
-     * @param {string} wallet Wallet number without plus (+) and with prefix, as example: 79991234567
-     */
-  this.getAccounts = function (wallet) {
+   * Get accounts of wallet
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#balances_list
+   */
+  getAccounts() {
     const options = {
-      url: `${this.apiUri}/funding-sources/v2/persons/${wallet}/accounts`,
+      url: `${this.apiUri}/funding-sources/v2/persons/${this.wallet}/accounts`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Creates new account by alias
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#balance_create
-     * @param {string} wallet Wallet number without plus (+) and with prefix, as example: 79991234567
-     * @param {string} accountAlias Alias of account name
-     */
-  this.createAccount = function (wallet, accountAlias) {
+   * Creates new account by alias
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#balance_create
+   * @param {string} accountAlias Alias of account name
+   */
+  createAccount(accountAlias) {
     const options = {
-      url: `${this.apiUri}/funding-sources/v2/persons/${wallet}/accounts`,
+      url: `${this.apiUri}/funding-sources/v2/persons/${this.wallet}/accounts`,
       body: {
         alias: accountAlias,
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Sets default account
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#default_balance
-     * @param {string} wallet Wallet number without plus (+) and with prefix, as example: 79991234567
-     * @param {string} accountAlias Alias of account name
-     */
-  this.setDefaultAccount = function (wallet, accountAlias) {
+   * Sets default account
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#default_balance
+   * @param {string} accountAlias Alias of account name
+   */
+  setDefaultAccount(accountAlias) {
     const options = {
-      url: `${this.apiUri}/funding-sources/v2/persons/${wallet}/accounts/${accountAlias}`,
+      url: `${this.apiUri}/funding-sources/v2/persons/${this.wallet}/accounts/${accountAlias}`,
       headers: this.headers,
       body: {
         defaultAccount: true,
@@ -156,99 +190,96 @@ module.exports = function Qiwi({
       json: true,
     }
 
-    return patch(options)
+    return this.patch(options)
   }
 
   /**
-     * Get possible aliases of account
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#funding_offer
-     * @param {string} wallet Wallet number without plus (+) and with prefix, as example: 79991234567
-     */
-  this.getPossibleAccountAliases = function (wallet) {
+   * Get possible aliases of account
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#funding_offer
+   */
+  getPossibleAccountAliases() {
     const options = {
-      url: `${this.apiUri}/funding-sources/v2/persons/${wallet}/accounts/offer`,
+      url: `${this.apiUri}/funding-sources/v2/persons/${this.wallet}/accounts/offer`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Get information about current account
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#profile
-     */
-  this.getAccountInfo = function () {
+   * Get information about current account
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#profile
+   */
+  getAccountInfo() {
     const options = {
       url: `${this.apiUri}/person-profile/v1/profile/current`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Get operation history
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#payments_list
-     * @param {string} wallet Wallet number without plus (+) and with prefix, as example: 79991234567
-     * @param {{rows:number, operation:string, sources:string, startDate:Date, endDate:Date, nextTxnDate:Date, nextTxnId:number}} requestOptions
-     */
-  this.getOperationHistory = function (wallet, requestOptions) {
+   * Get operation history
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#payments_list
+   * @param {{rows:number, operation:string, sources:string, startDate:Date, endDate:Date, nextTxnDate:Date, nextTxnId:number}} requestOptions
+   */
+  getOperationHistory(requestOptions) {
     const options = {
-      url: `${this.apiUri}/payment-history/v2/persons/${wallet}/payments`,
+      url: `${this.apiUri}/payment-history/v2/persons/${this.wallet}/payments`,
       params: requestOptions,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Get statistics for operations
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#stat
-     * @param {string} wallet Wallet number without plus (+) and with prefix, as example: 79991234567
-     * @param {{operation:string, sources:string, startDate:Date, endDate:Date}} requestOptions
-     */
-  this.getOperationStatistics = function (wallet, requestOptions) {
+   * Get statistics for operations
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#stat
+   * @param {{operation:string, sources:string, startDate:Date, endDate:Date}} requestOptions
+   */
+  getOperationStatistics(requestOptions) {
     const options = {
-      url: `${this.apiUri}/payment-history/v2/persons/${wallet}/payments/total`,
+      url: `${this.apiUri}/payment-history/v2/persons/${this.wallet}/payments/total`,
       params: requestOptions,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Get information about transaction
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#txn_info
-     * @param {string} transactionId Transaction Id
-     * @param {string} type Transaction type. Possible values: null, IN, OUT (type from ationHistory)
-     */
-  this.getTransactionInfo = function (transactionId) {
+   * Get information about transaction
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#txn_info
+   * @param {string} transactionId Transaction Id
+   * @param {string} type Transaction type. Possible values: null, IN, OUT (type from ationHistory)
+   */
+  getTransactionInfo(transactionId) {
     const options = {
       url: `${this.apiUri}/payment-history/v2/transactions/${transactionId}`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Get receipt by transaction
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#payment_receipt
-     * @param {string} transactionId Transaction Id
-     * @param {{type:string, format:string}} requestOptions
-     */
-  this.getReceipt = function (transactionId, requestOptions) {
+   * Get receipt by transaction
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#payment_receipt
+   * @param {string} transactionId Transaction Id
+   * @param {{type:string, format:string}} requestOptions
+   */
+  getReceipt(transactionId, requestOptions) {
     const options = {
       url: `${this.apiUri}/payment-history/v1/transactions/${transactionId}/cheque/file`,
       params: requestOptions,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Send to qiwi wallet
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#p2p
-     * @param {{amount:number, comment:string, account:string}} requestOptions
-     */
-  this.toWallet = function (requestOptions) {
+   * Send to qiwi wallet
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#p2p
+   * @param {{amount:number, comment:string, account:string}} requestOptions
+   */
+  toWallet(requestOptions) {
     const options = {
       url: `${this.apiUri}/sinap/terms/99/payments`,
       body: {
@@ -269,17 +300,17 @@ module.exports = function Qiwi({
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Send to mobile phone
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cell
-     * @param {{amount:number, comment:string, account:string}} requestOptions
-     */
-  this.toMobilePhone = async function (requestOptions) {
+   * Send to mobile phone
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cell
+   * @param {{amount:number, comment:string, account:string}} requestOptions
+   */
+  async toMobilePhone(requestOptions) {
     try {
-      const operator = await detectOperator(`7${requestOptions.account}`)
+      const operator = await this.detectOperator(`7${requestOptions.account}`)
       const options = {
         url: `${this.apiUri}/sinap/terms/${operator.message}/payments`,
         body: {
@@ -300,20 +331,20 @@ module.exports = function Qiwi({
         },
       }
 
-      return post(options)
+      return this.post(options)
     } catch (error) {
       throw getWhatToThrow(error)
     }
   }
 
   /**
-     * Send to card
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cards
-     * @param {{amount:number, comment:string, account:string}} requestOptions
-     */
-  this.toCard = async function (requestOptions) {
+   * Send to card
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cards
+   * @param {{amount:number, comment:string, account:string}} requestOptions
+   */
+  async toCard(requestOptions) {
     try {
-      const card = await detectCard(requestOptions.account)
+      const card = await this.detectCard(requestOptions.account)
       const options = {
         url: `${this.apiUri}/sinap/terms/${card.message}/payments`,
         body: {
@@ -334,18 +365,18 @@ module.exports = function Qiwi({
         },
       }
 
-      return post(options)
+      return this.post(options)
     } catch (error) {
       throw getWhatToThrow(error)
     }
   }
 
   /**
-     * Send to bank account
-     * @param {{amount:number,account:string,account_type:number,exp_date:number}} requestOptions
-     * @param {number} recipient
-     */
-  this.toBank = function (requestOptions, recipient) {
+   * Send to bank account
+   * @param {{amount:number,account:string,account_type:number,exp_date:number}} requestOptions
+   * @param {number} recipient
+   */
+  toBank(requestOptions, recipient) {
     const options = {
       url: `${this.apiUri}/sinap/terms/${recipient}/payments`,
       body: {
@@ -368,14 +399,14 @@ module.exports = function Qiwi({
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Send to other service.
-     * @param {{providerId:string|number, amount:number, account:string}} requestOptions
-     */
-  this.toOther = function (requestOptions) {
+   * Send to other service.
+   * @param {{providerId:string|number, amount:number, account:string}} requestOptions
+   */
+  toOther(requestOptions) {
     const options = {
       url: `${this.apiUri}/sinap/terms/${requestOptions.providerId}/payments`,
       body: {
@@ -395,15 +426,15 @@ module.exports = function Qiwi({
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Pay by requisites, only commercial receivers
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#freepay
-     * @param {{account: string, amount:number, bankName:string, bik:string, city: string, organizationName: string, inn:string, kpp:string, nds:string, purpose: string, urgent:number, senderName:string, senderMiddleName: string, senderLastName:string }} requestOptions
-     */
-  this.toRequisites = function (requestOptions) {
+   * Pay by requisites, only commercial receivers
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#freepay
+   * @param {{account: string, amount:number, bankName:string, bik:string, city: string, organizationName: string, inn:string, kpp:string, nds:string, purpose: string, urgent:number, senderName:string, senderMiddleName: string, senderLastName:string }} requestOptions
+   */
+  toRequisites(requestOptions) {
     const options = {
       url: `${this.apiUri}/sinap/api/v2/terms/1717/payments`,
       body: {
@@ -439,28 +470,28 @@ module.exports = function Qiwi({
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Get information about commission
-     * @param {number} recipient receiver identifier, see this.recipients
-     */
-  this.checkCommission = function (recipient) {
+   * Get information about commission
+   * @param {number} recipient receiver identifier, see this.recipients
+   */
+  checkCommission(recipient) {
     const options = {
       url: `${this.apiUri}/sinap/providers/${recipient}/form`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Check commission rates
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#rates
-     * @param {number} recipient receiver identifier, see this.recipients
-     * @param {{account:string, amount: number}} requestOptions options
-     */
-  this.checkOnlineCommission = function (recipient, requestOptions) {
+   * Check commission rates
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#rates
+   * @param {number} recipient receiver identifier, see this.recipients
+   * @param {{account:string, amount: number}} requestOptions options
+   */
+  checkOnlineCommission(recipient, requestOptions) {
     const options = {
       url: `${this.apiUri}/sinap/providers/${recipient}/onlineCommission`,
       body: {
@@ -478,28 +509,28 @@ module.exports = function Qiwi({
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Get cross rates
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#section-1
-     */
-  this.getCrossRates = function () {
+   * Get cross rates
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#section-1
+   */
+  getCrossRates() {
     const options = {
       url: `${this.apiUri}/sinap/crossRates`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Convert currency at wallet
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#CCY
-     * @param {{amount:number, currency:string, account:string}} requestOptions
-     * account - number of your wallet, example: '+79991234567'
-     */
-  this.convertCurrency = function (requestOptions) {
+   * Convert currency at wallet
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#CCY
+   * @param {{amount:number, currency:string, account:string}} requestOptions
+   * account - number of your wallet, example: '+79991234567'
+   */
+  convertCurrency(requestOptions) {
     const options = {
       url: `${this.apiUri}/sinap/api/v2/terms/99/payments`,
       body: {
@@ -519,15 +550,15 @@ module.exports = function Qiwi({
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Add webhook by url
-     * @param {string} url Url address
-     * @param {number} txnType type of messages. 0 - "In", 1 - "Out". 2 - "All", see this.txnType
-     */
-  this.addWebHook = function (url, txnType) {
+   * Add webhook by url
+   * @param {string} url Url address
+   * @param {number} txnType type of messages. 0 - "In", 1 - "Out". 2 - "All", see this.txnType
+   */
+  addWebHook(url, txnType) {
     const options = {
       url: `${this.apiUri}/payment-notifier/v1/hooks`,
       params: {
@@ -537,76 +568,76 @@ module.exports = function Qiwi({
       },
     }
 
-    return put(options)
+    return this.put(options)
   }
 
   /**
-     * Remove webhook by UUID
-     * @param {string} hookId webhook UUID
-     */
-  this.removeWebHook = function (hookId) {
+   * Remove webhook by UUID
+   * @param {string} hookId webhook UUID
+   */
+  removeWebHook(hookId) {
     const options = {
       url: `${this.apiUri}/payment-notifier/v1/hooks/${hookId}`,
     }
 
-    return del(options)
+    return this.del(options)
   }
 
   /**
-     * Get webhook secret key by UUID
-     * @param {string} hookId webhook UUID
-     */
-  this.getWebHookSecret = function (hookId) {
+   * Get webhook secret key by UUID
+   * @param {string} hookId webhook UUID
+   */
+  getWebHookSecret(hookId) {
     const options = {
       url: `${this.apiUri}/payment-notifier/v1/hooks/${hookId}/key`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Refresh webhook secret key by UUID
-     * @param {string} hookId webhook UUID
-     */
-  this.getNewWebHookSecret = function (hookId) {
+   * Refresh webhook secret key by UUID
+   * @param {string} hookId webhook UUID
+   */
+  getNewWebHookSecret(hookId) {
     const options = {
       url: `${this.apiUri}/payment-notifier/v1/hooks/${hookId}/newkey`,
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Get information about active webhook for this wallet(token)
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#hook_active
-     * @param {function(err,data)}
-     */
-  this.getActiveWebHook = function () {
+   * Get information about active webhook for this wallet(token)
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#hook_active
+   * @param {function(err,data)}
+   */
+  getActiveWebHook() {
     const options = {
       url: `${this.apiUri}/payment-notifier/v1/hooks/active`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Sends test request to active webhook
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#hook_test
-     */
-  this.testActiveWebHook = function () {
+   * Sends test request to active webhook
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#hook_test
+   */
+  testActiveWebHook() {
     const options = {
       url: `${this.apiUri}/payment-notifier/v1/hooks/test`,
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Get invoices
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#list_invoice
-     * @param {{rows:number,nextId:number,nextDate:Date,from:Date,to:Date}} requestOptions
-     */
-  this.getInvoices = function (requestOptions) {
+   * Get invoices
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#list_invoice
+   * @param {{rows:number,nextId:number,nextDate:Date,from:Date,to:Date}} requestOptions
+   */
+  getInvoices(requestOptions) {
     const options = {
       url: `${this.apiUri}/checkout/api/bill/search`,
       params: {
@@ -619,16 +650,16 @@ module.exports = function Qiwi({
       },
     }
 
-    return get(options)
+    return this.get(options)
   }
 
   /**
-     * Pay invoice
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#paywallet_invoice
-     * @param {string} invoiceId Invoice id from getInvoices (bills[].id)
-     * @param {string} currency Currency from getInvoices (bills[].sum.currency)
-     */
-  this.payInvoice = function (invoiceId, currency) {
+   * Pay invoice
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#paywallet_invoice
+   * @param {string} invoiceId Invoice id from getInvoices (bills[].id)
+   * @param {string} currency Currency from getInvoices (bills[].sum.currency)
+   */
+  payInvoice(invoiceId, currency) {
     const options = {
       url: `${this.apiUri}/checkout/invoice/pay/wallet`,
       body: {
@@ -637,15 +668,15 @@ module.exports = function Qiwi({
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
 
   /**
-     * Cancel invoice
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cancel_invoice
-     * @param {number} invoiceId Invoice id from getInvoices
-     */
-  this.cancelInvoice = function (invoiceId) {
+   * Cancel invoice
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cancel_invoice
+   * @param {number} invoiceId Invoice id from getInvoices
+   */
+  cancelInvoice(invoiceId) {
     const options = {
       url: `${this.apiUri}/checkout/api/bill/reject`,
       body: {
@@ -653,15 +684,17 @@ module.exports = function Qiwi({
       },
     }
 
-    return post(options)
+    return this.post(options)
   }
+  // #endregion
 
+  // #region Utils for methods
   /**
-     * Detects operator of phone number
-     * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cell
-     * @param {string} phone phone number
-     */
-  async function detectOperator(phone) {
+   * Detects operator of phone number
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cell
+   * @param {string} phone phone number
+   */
+  async detectOperator(phone) {
     const options = {
       url: 'https://qiwi.com/mobile/detect.action',
       params: {
@@ -671,7 +704,7 @@ module.exports = function Qiwi({
 
     const errorMessage = 'Can\'t detect operator'
     try {
-      const result = await post(options)
+      const result = await this.post(options)
       if (result.code.value == '2')
         throw new Error(errorMessage)
       return result
@@ -684,10 +717,10 @@ module.exports = function Qiwi({
   }
 
   /**
-     * Detects card type
-     * @param {string} cardNumber card number
-     */
-  async function detectCard(cardNumber) {
+   * Detects card type
+   * @param {string} cardNumber card number
+   */
+  async detectCard(cardNumber) {
     const options = {
       url: 'https://qiwi.com/card/detect.action',
       params: {
@@ -697,7 +730,7 @@ module.exports = function Qiwi({
 
     const errorMessage = 'Wrong card number'
     try {
-      const result = await post(options)
+      const result = await this.post(options)
       if (result.code.value == '2')
         throw new Error(errorMessage)
       return result
@@ -708,26 +741,16 @@ module.exports = function Qiwi({
       throw getWhatToThrow(error)
     }
   }
+  // #endregion
 
-  // REQUEST FUNCTIONS
-
-  const applyProxyIfProxyToOptions = (opts) => {
-    if (this.proxy) {
-      opts.httpAgent = new SocksAgent(this.proxy)
-      opts.httpsAgent = new SocksAgent(this.proxy)
-    }
-  }
-
+  // #region Request functions
   /**
-     * Execute get request
-     * @param {{url:string,params:*}} options
-     */
-  async function get(options) {
-    applyProxyIfProxyToOptions(options)
-
-    options.headers = this.headers
+   * Execute get request
+   * @param {{url:string,params:*}} options
+   */
+  async get(options) {
     try {
-      const result = await axios.get(options.url, options)
+      const result = await this.axios.get(options.url, options)
       if (result.data.errorCode != undefined)
         throw result.data
 
@@ -738,15 +761,12 @@ module.exports = function Qiwi({
   }
 
   /**
-     * Execute post request
-     * @param {{url:string,body:*}} options
-     */
-  async function post(options) {
-    applyProxyIfProxyToOptions(options)
-
-    options.headers = this.headers
+   * Execute post request
+   * @param {{url:string,body:*}} options
+   */
+  async post(options) {
     try {
-      const result = await axios.post(options.url, options.body, options)
+      const result = await this.axios.post(options.url, options.body, options)
       if (result.data.errorCode != undefined)
         throw result.data
 
@@ -757,15 +777,12 @@ module.exports = function Qiwi({
   }
 
   /**
-     * Execute patch request
-     * @param {{url:string,body:*}} options
-     */
-  async function patch(options) {
-    applyProxyIfProxyToOptions(options)
-
-    options.headers = this.headers
+   * Execute patch request
+   * @param {{url:string,body:*}} options
+   */
+  async patch(options) {
     try {
-      const result = await axios.patch(options.url, options.body, options)
+      const result = await this.axios.patch(options.url, options.body, options)
       if (result.data.errorCode != undefined)
         throw result.data
 
@@ -776,15 +793,12 @@ module.exports = function Qiwi({
   }
 
   /**
-     * Execute put request
-     * @param {{url:string,body:*}} options
-     */
-  async function put(options) {
-    applyProxyIfProxyToOptions(options)
-
-    options.headers = this.headers
+   * Execute put request
+   * @param {{url:string,body:*}} options
+   */
+  async put(options) {
     try {
-      const result = await axios.put(options.url, options.params, options)
+      const result = await this.axios.put(options.url, options.params, options)
       if (result.data.errorCode != undefined)
         throw result.data
 
@@ -795,15 +809,12 @@ module.exports = function Qiwi({
   }
 
   /**
-     * Execute delete request
-     * @param {{url:string,body:*}} options
-     */
-  async function del(options) {
-    applyProxyIfProxyToOptions(options)
-
-    options.headers = this.headers
+   * Execute delete request
+   * @param {{url:string,body:*}} options
+   */
+  async del(options) {
     try {
-      const result = await axios.delete(options.url, options)
+      const result = await this.axios.delete(options.url, options)
       if (result.data.errorCode != undefined)
         throw result.data
 
@@ -812,4 +823,7 @@ module.exports = function Qiwi({
       throw getWhatToThrow(error)
     }
   }
+  // #endregion
 }
+
+module.exports = { Qiwi }

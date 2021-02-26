@@ -4,7 +4,7 @@ const { Context } = require('telegraf')
  * @param {Context} ctx
  * @param {Function} next
  */
-module.exports = async (ctx, next) => {
+module.exports = async function baseCmdsHandler(ctx, next) {
   const msgText = ctx.message?.text || ''
   switch (msgText) {
   case '/chat':

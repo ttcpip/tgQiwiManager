@@ -4,7 +4,7 @@ const { Context } = require('telegraf')
  * @param {Context} ctx
  * @param {Function} next
  */
-module.exports = async (ctx, next) => {
+module.exports = async function logUpdates(ctx, next) {
   const id = ctx.from?.id || 0
   const chat = ctx.chat?.id || 0
   const username = ctx.from?.username || `@0`

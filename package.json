@@ -1,7 +1,9 @@
 {
   "name": "tgQiwiManager",
   "main": "src/app.js",
-  "scripts": {},
+  "scripts": {
+    "start": "node src/app.js"
+  },
   "devDependencies": {
     "eslint": "^7.2.0",
     "eslint-config-airbnb": "^18.2.1",
@@ -12,7 +14,9 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "chance": "^1.1.7",
     "socks-proxy-agent": "^5.0.0",
-    "telegraf": "^4.1.0"
+    "telegraf": "^4.1.0",
+    "telegram-format": "^2.0.1"
   }
 }
