@@ -1,17 +1,32 @@
-const { Telegraf } = require('telegraf')
-const { applyMiddlewares } = require('./middlewares')
+const { Telegraf, Scenes: { Stage }, session } = require('telegraf')
+const middlewares = require('./middlewares')
+const scenes = require('./scenes')
 const handlers = require('./handlers')
 
 module.exports.initBot = function initBot(token) {
   const bot = new Telegraf(token)
 
-  applyMiddlewares(bot)
+  // Middlewares
+  bot.use(middlewares.logErrors)
+  bot.use(middlewares.logUpdates)
+  bot.use(middlewares.ignoreNonAdminUsers)
+  bot.on('callback_query', middlewares.callbackQueryUtilCommandsHandler)
+  bot.on('text', middlewares.baseCmdsHandler)
 
+  // Scenes
+  bot.use(session())
+  bot.use(new Stage(Object.values(scenes)).middleware())
+
+  // Logic
   bot.action('walletsBalances', handlers.walletsBalancesHandler)
   bot.action('walletsList', handlers.walletsListHandler)
+  bot.action(/withdraw=(.+)/, handlers.withdrawHandler)
+  bot.action('addQiwi', Stage.enter('ADD_QIWI_SCENE_ID'))
+  bot.action('delQiwi', Stage.enter('DEL_QIWI_SCENE_ID'))
 
-  bot.on('message', handlers.mainMenuHandler)
-  bot.action('mainMenu', handlers.mainMenuHandler)
+  // Defaults
+  bot.on('message', Stage.enter('MAIN_MENU_SCENE_ID'))
+  bot.action('mainMenu', Stage.enter('MAIN_MENU_SCENE_ID'))
   bot.on('callback_query', (ctx) => ctx.answerCbQuery('No handler'))
 
   return bot

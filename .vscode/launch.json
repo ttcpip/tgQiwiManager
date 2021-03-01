@@ -13,7 +13,8 @@
       ],
       "program": "${workspaceFolder}/src/app.js",
       "outFiles": [
-        "${workspaceFolder}/**/*.js"
+        "${workspaceFolder}/**/*.js",
+        "**/node_modules/**"
       ]
     }
   ]

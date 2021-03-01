@@ -120,6 +120,32 @@ class Qiwi {
     return rubs
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  async sendRubToCard({ amount, card }) {
+    // const err = new Error(`Err from sendRubToCard`)
+    // err.response = {
+    //   data: {
+    //     dataErr: 'aspdasd',
+    //     dataSmth: ['dasd', 111, 22335],
+    //   },
+    // }
+    // throw err
+    console.log(`Mocking call to this.toCard with params: `)
+    console.log({ amount, account: card })
+
+    return {
+      mockAmount: amount,
+      mockAccount: card,
+      mockComment: '',
+    }
+    // return await this.toCard({
+    //   amount,
+    //   account: card,
+    //   comment: '',
+    // })
+  }
+  // #endregion
+
   // #region Raw qiwi api methods
   /**
    * Get identification data

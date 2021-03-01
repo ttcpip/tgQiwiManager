@@ -21,7 +21,7 @@ class QiwiAccsManager {
 
   /**
    * @param {String} id Unique id for the account
-   * @param {Qiwi} qiwi
+   * @param {import('./Qiwi').Qiwi} qiwi
    */
   add(id, qiwi) {
     if (this.accs.has(id))
@@ -34,8 +34,74 @@ class QiwiAccsManager {
   }
 
   /**
+   * Creates Qiwi instance, adds this to qiwiAccsManager.accs, saves to settings.data.qiwiAccs[id]
+   * @param {Object} params
+   * @param {String} params.wallet
+   * @param {String} params.id
+   * @param {String} params.token
+   * @param {String} params.ip
+   * @param {String} params.port
+   * @param {String} params.username
+   * @param {String} params.password
+   * @param {import('./settings')} params.settings
+   * @returns {Promise<Qiwi>} created Qiwi instance
+   */
+  async createAndSave(params) {
+    const {
+      wallet, id, token, ip, port, username, password, settings,
+    } = params
+
+    const qiwiData = {
+      token,
+      proxy: {
+        host: ip,
+        port,
+        userId: username,
+        password,
+      },
+      wallet,
+    }
+    const qiwi = new Qiwi(qiwiData)
+    this.add(id, qiwi)
+    settings.data.qiwiAccs[id] = qiwiData
+    await settings.save()
+
+    return qiwi
+  }
+
+  /**
+   * Deletes from qiwiAccsManager.accs and to settings.data.qiwiAccs[id], saves settings
+   * @param {Object} params
+   * @param {String} params.id
+   * @param {import('./settings')} params.settings
+   */
+  async deleteByIdAndSave(params) {
+    const { id, settings } = params
+
+    this.deleteById(id)
+    delete settings.data.qiwiAccs[id]
+    await settings.save()
+  }
+
+  /**
    * @param {String} id Unique id for the account
-   * @returns {Qiwi}
+   * @returns {boolean}
+   */
+  hasById(id) {
+    return this.accs.has(id)
+  }
+
+  /**
+   * @param {String} walletNumber Wallet number of the account
+   * @returns {boolean}
+   */
+  hasByWalletNumber(walletNumber) {
+    return this.walletNumbers.has(walletNumber)
+  }
+
+  /**
+   * @param {String} id Unique id for the account
+   * @returns {import('./Qiwi').Qiwi}
    */
   getById(id) {
     if (!this.accs.has(id))
@@ -46,7 +112,7 @@ class QiwiAccsManager {
 
   /**
    * @param {String} walletNumber Wallet number of the account
-   * @returns {Qiwi}
+   * @returns {import('./Qiwi').Qiwi}
    */
   getByWalletNumber(walletNumber) {
     if (!this.walletNumbers.has(walletNumber))
@@ -80,7 +146,7 @@ class QiwiAccsManager {
   }
 
   /**
-   * @returns {[string, Qiwi][]} Array of [accId, accQiwiInstance]
+   * @returns {[string, import('./Qiwi').Qiwi][]} Array of [accId, accQiwiInstance]
    */
   getAllAccs() {
     return [...this.accs.entries()]

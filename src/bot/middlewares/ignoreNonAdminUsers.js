@@ -1,8 +1,7 @@
-const { Context } = require('telegraf')
 const settings = require('../../lib/settings').getInstance()
 
 /**
- * @param {Context} ctx
+ * @param {import('telegraf').Context} ctx
  * @param {Function} next
  */
 module.exports = async function ignoreNonAdminUsers(ctx, next) {

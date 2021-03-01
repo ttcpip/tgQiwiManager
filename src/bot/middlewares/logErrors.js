@@ -1,7 +1,5 @@
-const { Context } = require('telegraf')
-
 /**
- * @param {Context} ctx
+ * @param {import('telegraf').Context} ctx
  * @param {Function} next
  */
 module.exports = async function logErrors(ctx, next) {

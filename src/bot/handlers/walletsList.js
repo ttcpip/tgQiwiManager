@@ -1,9 +1,9 @@
-const { Context, Markup } = require('telegraf')
+const { Markup } = require('telegraf')
 const { markdownv2: format } = require('telegram-format')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 
 /**
- * @param {Context} ctx
+ * @param {import('telegraf').Context} ctx
  * @param {Function} next
  */
 module.exports = async function walletsListHandler(ctx) {
@@ -13,6 +13,7 @@ module.exports = async function walletsListHandler(ctx) {
   const text = `Аккаунты:\n${format.monospaceBlock(accsInfo)}`
   const KB = Markup.inlineKeyboard([
     [Markup.button.callback('Добавить киви', 'addQiwi')],
+    [Markup.button.callback('Удалить киви', 'delQiwi')],
     [Markup.button.callback('Назад', 'mainMenu')],
   ]).reply_markup
 

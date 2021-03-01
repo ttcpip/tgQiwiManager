@@ -1,12 +1,8 @@
-const { Context, Markup } = require('telegraf')
-const { markdownv2: format } = require('telegram-format')
-const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
+const { Scenes, Markup } = require('telegraf')
 
-/**
- * @param {Context} ctx
- * @param {Function} next
- */
-module.exports = async function mainMenuHandler(ctx) {
+const wizardScene = new Scenes.BaseScene('MAIN_MENU_SCENE_ID')
+
+wizardScene.enter(async (ctx) => {
   const text = `⚙️ Главное меню`
   const extra = {
     reply_markup: Markup.inlineKeyboard([
@@ -26,7 +22,10 @@ module.exports = async function mainMenuHandler(ctx) {
     parse_mode: 'MarkdownV2',
   }
 
+  ctx.scene.leave()
   return ctx.callbackQuery
     ? ctx.editMessageText(text, extra)
     : ctx.reply(text, extra)
-}
+})
+
+module.exports = wizardScene

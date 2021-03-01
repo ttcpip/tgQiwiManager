@@ -1,13 +1,13 @@
-const { Context, Markup } = require('telegraf')
+const { Markup } = require('telegraf')
 const { markdownv2: format } = require('telegram-format')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 
 /**
- * @param {Context} ctx
+ * @param {import('telegraf').Context} ctx
  * @param {Function} next
  */
 module.exports = async function walletsBalancesHandler(ctx) {
-  await ctx.answerCbQuery('💰 Получаю информацию о балансах...').catch(() => {})
+  ctx.answerCbQuery('💰 Получаю информацию о балансах...').catch(() => {})
 
   const balances = await qiwiAccsManager.getAllBalances()
   let accsInfoText = ''
@@ -20,7 +20,6 @@ module.exports = async function walletsBalancesHandler(ctx) {
     const errText = err ? `[Ошибка: ${err.message || err.description || '<no err msg>'}]` : null
     const accInfo = `${qiwi.wallet} ${id} ${balanceText || errText}\n`
     accsInfoText += accInfo
-
     rows.push([Markup.button.callback(`Вывод с ${id}`, `withdraw=${id}`)])
   }
 
@@ -30,5 +29,5 @@ module.exports = async function walletsBalancesHandler(ctx) {
     [Markup.button.callback('Назад', `mainMenu`)],
   ]).reply_markup
 
-  await ctx.editMessageText(text, { reply_markup: KB, parse_mode: 'MarkdownV2' })
+  return await ctx.editMessageText(text, { reply_markup: KB, parse_mode: 'MarkdownV2' })
 }
