@@ -11,7 +11,7 @@ wizardScene.enter(async (ctx) => {
         Markup.button.callback('Балансы', 'walletsBalances'),
       ],
       [
-        Markup.button.callback('Прокси', 'proxy'),
+        Markup.button.callback('Прокси', '*delMsg*proxy'),
         Markup.button.callback('Статистика', 'stats'),
       ],
       [

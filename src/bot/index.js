@@ -23,6 +23,7 @@ module.exports.initBot = function initBot(token) {
   bot.action(/withdraw=(.+)/, handlers.withdrawHandler)
   bot.action('addQiwi', Stage.enter('ADD_QIWI_SCENE_ID'))
   bot.action('delQiwi', Stage.enter('DEL_QIWI_SCENE_ID'))
+  bot.action('proxy', Stage.enter('PROXY_MAIN_SCENE_ID'))
 
   // Defaults
   bot.on('message', Stage.enter('MAIN_MENU_SCENE_ID'))
