@@ -18,7 +18,7 @@ wizardScene.enter(async (ctx) => {
       ],
       [
         Markup.button.callback('Авто-вывод', 'autoWithdraw'),
-        Markup.button.callback('История', 'historyList'),
+        Markup.button.callback('История', 'historyList=OUT'),
       ],
     ]).reply_markup,
     parse_mode: 'MarkdownV2',

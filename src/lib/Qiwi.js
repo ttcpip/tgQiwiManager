@@ -169,7 +169,6 @@ class Qiwi {
    * Rows can be 1-50
    * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#payments_list
    * @param {{rows:number, operation:string, sources:string, startDate:Date, endDate:Date, nextTxnDate:Date, nextTxnId:number}} params
-   * @areturns {{comment: string, status: string, statusText: string, total: {amount: number, currency: number}}[]}
    */
   async getOperations(params) {
     const { data, nextTxnDate, nextTxnId } = await this.getOperationHistory(params)
@@ -177,9 +176,23 @@ class Qiwi {
     /**
      * @type {[]}
      */
-    const data1 = data
+    const dataArr = data
 
-    return data1.map((t) => ({
+    const getTypeText = (type) => {
+      switch (type) {
+      case 'IN':
+        return 'Пополнение'
+      case 'OUT':
+        return 'Платеж'
+      case 'QIWI_CARD':
+        return 'Платеж с карт QIWI (QVC, QVP)'
+
+      default:
+        return '[Неизвестный тип]'
+      }
+    }
+
+    return dataArr.map((t) => ({
       date: t.date,
       errorCode: t.errorCode,
       error: t.error,
@@ -196,6 +209,7 @@ class Qiwi {
       providerLongName: t.provider.longName,
       comment: t.comment,
       type: t.type,
+      typeText: getTypeText(t.type),
 
       rawData: t,
     }))

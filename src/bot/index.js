@@ -26,8 +26,8 @@ module.exports.initBot = function initBot(token) {
   bot.action('proxy', Stage.enter('PROXY_MAIN_SCENE_ID'))
   bot.action('statList', handlers.statListHandler)
   bot.action(/accStats=(.+)/, handlers.accStatsHandler)
-  bot.action('historyList', handlers.historyListHandler)
-  bot.action(/accHistory=(.+)/, handlers.accHistoryHandler)
+  bot.action(/historyList=(.+)/, handlers.historyListHandler)
+  bot.action(/accHistory=(.+)=(.+)/, handlers.accHistoryHandler)
 
   // Defaults
   bot.on('message', Stage.enter('MAIN_MENU_SCENE_ID'))
