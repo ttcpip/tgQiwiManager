@@ -1,0 +1,18 @@
+{
+  "tgBotToken": "",
+  "tgAdminChatIds": [
+    0
+  ],
+  "qiwiAccs": {
+    "account_id": {
+      "wallet": "79600000000",
+      "token": "0",
+      "proxy": {
+        "host": "0.0.0.0",
+        "port": "8080",
+        "userId": "123",
+        "password": "456"
+      }
+    }
+  }
+}
