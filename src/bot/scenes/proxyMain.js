@@ -2,6 +2,7 @@ const { markdownv2: format } = require('telegram-format')
 const dedent = require('dedent')
 const { Scenes, Markup } = require('telegraf')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
+const settings = require('../../lib/settings').getInstance()
 const { parseProxyStr } = require('../../lib/utils')
 const { Qiwi } = require('../../lib/Qiwi')
 
@@ -18,10 +19,27 @@ const getKBCancel = (isWithConfirm = false) => {
 const getMainKb = () => Markup.inlineKeyboard([
   [Markup.button.callback('Проверить валидность', 'checkValid')],
   [Markup.button.callback('Установить для аккаунта', 'setForAcc')],
-  [Markup.button.callback('❌Отмена', 'cancel')],
+  // [Markup.button.callback('❌Отмена', 'cancel')],
 ]).reply_markup
 
 const promptProxyText = `Введите прокси в формате: ${escape(`ip:порт@логин:пароль`)}`
+
+const sceneMainMenuHandler = async (ctx) => {
+  const {
+    ip, port, username, password,
+  } = ctx.scene.session.state
+
+  if (!ip || !port || !username || !password)
+    return await ctx.reply(`Данные устарели, попробуйте снова`, { reply_markup: getKBCancel() })
+
+  const text = dedent`
+    ❗️ Прокси: ${boldEscape(ip)}:${boldEscape(port)}@${boldEscape(username)}:${boldEscape(password)}
+    ❓ Что делаем с ними?
+  `
+  return ctx.callbackQuery
+    ? await ctx.editMessageText(text, { reply_markup: getMainKb(), parse_mode: 'MarkdownV2' })
+    : await ctx.replyWithMarkdownV2(text, { reply_markup: getMainKb(), parse_mode: 'MarkdownV2' })
+}
 
 wizardScene.enter(async (ctx) => await ctx.replyWithMarkdownV2(promptProxyText, { reply_markup: getKBCancel() }))
 
@@ -41,7 +59,7 @@ wizardScene.on('text', async (ctx) => {
   } = parseProxyStr(proxyStr)
 
   if (!isValidProxy)
-    return await ctx.reply(`Невалидно введены прокси`)
+    return await ctx.reply(`Невалидно введены прокси`, { reply_markup: getKBCancel() })
 
   ctx.scene.session.state = {
     ...ctx.scene.session.state,
@@ -51,11 +69,7 @@ wizardScene.on('text', async (ctx) => {
     password,
   }
 
-  const text = dedent`
-    ❗️ Прокси: ${boldEscape(ip)}:${boldEscape(port)}@${boldEscape(username)}:${boldEscape(password)}
-    ❓ Что делаем с ними?
-  `
-  return await ctx.replyWithMarkdownV2(text, { reply_markup: getMainKb() })
+  return await sceneMainMenuHandler(ctx)
 })
 
 wizardScene.action('checkValid', async (ctx) => {
@@ -77,7 +91,11 @@ wizardScene.action('checkValid', async (ctx) => {
     },
   })
 
-  const extra = { reply_to_message_id: ctx.callbackQuery.message?.message_id, allow_sending_without_reply: true }
+  const extra = {
+    reply_to_message_id: ctx.callbackQuery.message?.message_id,
+    allow_sending_without_reply: true,
+    reply_markup: getKBCancel(),
+  }
   try {
     ctx.answerCbQuery('⏳Отправка запроса...').catch(() => {})
     await qiwi.get({ url: 'https://google.com' })
@@ -88,8 +106,44 @@ wizardScene.action('checkValid', async (ctx) => {
 })
 
 wizardScene.action('setForAcc', async (ctx) => {
-  // TODO
+  const rows = qiwiAccsManager
+    .getAllAccs()
+    .map(([id]) => [Markup.button.callback(id, `setForAcc=${id}`)])
+  rows.push([Markup.button.callback('Назад', 'toSceneMainMenu')])
+
+  const KB = Markup.inlineKeyboard(rows).reply_markup
+
+  return await ctx.editMessageText(`Для какого аккаунта?`, { reply_markup: KB })
 })
+
+wizardScene.action(/setForAcc=(.+)/, async (ctx) => {
+  const {
+    ip, port, username, password,
+  } = ctx.scene.session.state
+
+  if (!ip || !port || !username || !password)
+    return await ctx.reply(`Данные устарели, попробуйте снова`, { reply_markup: getKBCancel() })
+
+  const id = ctx.match[1]
+
+  if (!qiwiAccsManager.hasById(id))
+    return await ctx.answerCbQuery(`Не найден аккаунт киви с таким айди`, { show_alert: true })
+
+  await qiwiAccsManager.setProxyAndSave({
+    id,
+    settings,
+    proxy: {
+      ip,
+      port,
+      username,
+      password,
+    },
+  })
+
+  return await ctx.answerCbQuery(`✅Прокси установлены для аккаунта ${id}`, { show_alert: true })
+})
+
+wizardScene.action('toSceneMainMenu', sceneMainMenuHandler)
 
 wizardScene.use(async (ctx) => await ctx.replyWithMarkdownV2(promptProxyText, { reply_markup: getKBCancel() }))
 

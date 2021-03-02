@@ -34,7 +34,6 @@ class Qiwi {
 
     this.token = params.token
     this.wallet = params.wallet
-    this.proxy = { type: 5, ...params.proxy }
     this.apiUri = 'https://edge.qiwi.com'
 
     this.headers = {
@@ -44,11 +43,7 @@ class Qiwi {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
     }
 
-    this.axios = axiosLib.create({
-      httpAgent: new SocksAgent(this.proxy),
-      httpsAgent: new SocksAgent(this.proxy),
-      headers: this.headers,
-    })
+    this.setProxy({ type: 5, ...params.proxy })
 
     /**
      * Currency codes
@@ -770,6 +765,14 @@ class Qiwi {
   // #endregion
 
   // #region Request functions
+  setProxy(proxy) {
+    this.axios = axiosLib.create({
+      httpAgent: new SocksAgent(proxy),
+      httpsAgent: new SocksAgent(proxy),
+      headers: this.headers,
+    })
+  }
+
   /**
    * Execute get request
    * @param {{url:string,params:*}} options

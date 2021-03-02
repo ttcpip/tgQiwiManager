@@ -70,6 +70,41 @@ class QiwiAccsManager {
   }
 
   /**
+   * Sets proxy to the Qiwi instance, edits and saves at settings.data.qiwiAccs[id]
+   * @param {Object} params
+   * @param {String} params.id
+   * @param {Object} params.proxy
+   * @param {String} params.proxy.ip
+   * @param {String} params.proxy.port
+   * @param {String} params.proxy.username
+   * @param {String} params.proxy.password
+   * @param {import('./settings')} params.settings
+   */
+  async setProxyAndSave(params) {
+    const {
+      id,
+      proxy: {
+        ip, password, port, username,
+      },
+      settings,
+    } = params
+
+    const proxy = {
+      host: ip,
+      port,
+      userId: username,
+      password,
+    }
+    const qiwi = this.getById(id)
+    qiwi.setProxy(proxy)
+
+    if (settings.data.qiwiAccs[id]) {
+      settings.data.qiwiAccs[id].proxy = proxy
+      await settings.save()
+    }
+  }
+
+  /**
    * Deletes from qiwiAccsManager.accs and to settings.data.qiwiAccs[id], saves settings
    * @param {Object} params
    * @param {String} params.id
