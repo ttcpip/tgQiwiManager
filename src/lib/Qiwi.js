@@ -9,7 +9,7 @@ function getWhatToThrow(_err) {
   const errTextFromResponse = `${data || ''} ${status || ''} ${statusText || ''}`.trim()
   const errMsg = err.message || err.description || '[no err message]'
 
-  err.message = `${errMsg} | ${errTextFromResponse}`.trim()
+  err.message = `${errMsg}${errTextFromResponse ? ` | ${errTextFromResponse}` : ''}`.trim()
 
   return err
 }
@@ -128,19 +128,19 @@ class Qiwi {
     //   },
     // }
     // throw err
-    console.log(`Mocking call to this.toCard with params: `)
-    console.log({ amount, account: card })
+    // console.log(`Mocking call to this.toCard with params: `)
+    // console.log({ amount, account: card })
 
-    return {
-      mockAmount: amount,
-      mockAccount: card,
-      mockComment: '',
-    }
-    // return await this.toCard({
-    //   amount,
-    //   account: card,
-    //   comment: '',
-    // })
+    // return {
+    //   mockAmount: amount,
+    //   mockAccount: card,
+    //   mockComment: '',
+    // }
+    return await this.toCard({
+      amount,
+      account: card,
+      comment: '',
+    })
   }
 
   /**

@@ -1,3 +1,4 @@
+const dedent = require('dedent')
 const { Markup } = require('telegraf')
 const { markdownv2: format } = require('telegram-format')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
@@ -23,7 +24,11 @@ module.exports = async function walletsBalancesHandler(ctx) {
     rows.push([Markup.button.callback(`Вывод с ${id}`, `withdraw=${id}`)])
   }
 
-  const text = `${format.bold('💰 Балансы: ')}\n${format.monospaceBlock(accsInfoText)}`
+  const text = dedent`
+    ${format.bold('💰 Балансы: ')}
+      
+    ${format.monospaceBlock(accsInfoText)}${format.monospaceBlock(`Всего: ${Object.values(balances).reduce((p, c) => p + c.balance, 0)} руб.`)}
+  `
   const KB = Markup.inlineKeyboard([
     ...rows,
     [Markup.button.callback('Назад', `mainMenu`)],

@@ -51,7 +51,7 @@ module.exports = async function accHistoryHandler(ctx) {
     .join('\n')
   const text = dedent`
     📊 ${type === 'IN' ? 'Входящая' : type === 'OUT' ? 'Исходящая' : 'Вся'} история для аккаунта ${boldEscape(id)}:
-    (Максимум отображается - ${rows} элементов)
+    ${escape(`(Максимум отображается - ${rows} элементов)`)}
 
     ${monospaceBlock(historyText)}
   `
