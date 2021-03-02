@@ -3,6 +3,8 @@ const { Scenes, Markup } = require('telegraf')
 const wizardScene = new Scenes.BaseScene('MAIN_MENU_SCENE_ID')
 
 wizardScene.enter(async (ctx) => {
+  const { dontEdit } = ctx.scene.session.state
+
   const text = `⚙️ Главное меню`
   const extra = {
     reply_markup: Markup.inlineKeyboard([
@@ -23,9 +25,9 @@ wizardScene.enter(async (ctx) => {
   }
 
   ctx.scene.leave()
-  return ctx.callbackQuery
+  return await (ctx.callbackQuery && dontEdit
     ? ctx.editMessageText(text, extra)
-    : ctx.reply(text, extra)
+    : ctx.reply(text, extra))
 })
 
 module.exports = wizardScene
