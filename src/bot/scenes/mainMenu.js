@@ -12,7 +12,7 @@ wizardScene.enter(async (ctx) => {
       ],
       [
         Markup.button.callback('Прокси', '*delMsg*proxy'),
-        Markup.button.callback('Статистика', 'stats'),
+        Markup.button.callback('Статистика', 'statList'),
       ],
       [
         Markup.button.callback('Авто-вывод', 'autoWithdraw'),
