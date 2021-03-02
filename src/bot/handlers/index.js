@@ -4,4 +4,6 @@ module.exports = {
   withdrawHandler: require('./withdraw'),
   statListHandler: require('./statList'),
   accStatsHandler: require('./accStats'),
+  historyListHandler: require('./historyList'),
+  accHistoryHandler: require('./accHistory'),
 }

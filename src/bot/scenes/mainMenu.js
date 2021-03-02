@@ -18,14 +18,14 @@ wizardScene.enter(async (ctx) => {
       ],
       [
         Markup.button.callback('Авто-вывод', 'autoWithdraw'),
-        Markup.button.callback('История', 'history'),
+        Markup.button.callback('История', 'historyList'),
       ],
     ]).reply_markup,
     parse_mode: 'MarkdownV2',
   }
 
   ctx.scene.leave()
-  return await (ctx.callbackQuery && dontEdit
+  return await (ctx.callbackQuery && !dontEdit
     ? ctx.editMessageText(text, extra)
     : ctx.reply(text, extra))
 })

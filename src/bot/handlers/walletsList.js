@@ -12,8 +12,8 @@ module.exports = async function walletsListHandler(ctx) {
     .join('\n')
   const text = `📋 Аккаунты:\n${format.monospaceBlock(accsInfo)}`
   const KB = Markup.inlineKeyboard([
-    [Markup.button.callback('Добавить киви', 'addQiwi')],
-    [Markup.button.callback('Удалить киви', 'delQiwi')],
+    [Markup.button.callback('Добавить киви', '*delKb*addQiwi')],
+    [Markup.button.callback('Удалить киви', '*delKb*delQiwi')],
     [Markup.button.callback('Назад', 'mainMenu')],
   ]).reply_markup
 

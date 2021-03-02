@@ -2,13 +2,16 @@
 const SocksAgent = require('socks-proxy-agent')
 const axiosLib = require('axios').default
 
-function getWhatToThrow(err) {
+function getWhatToThrow(_err) {
+  const err = _err instanceof Error ? _err : new Error(`${_err}`)
+
+  const { data, status, statusText } = (err && err.response) || {}
+  const errTextFromResponse = `${data || ''} ${status || ''} ${statusText || ''}`.trim()
+  const errMsg = err.message || err.description || '[no err message]'
+
+  err.message = `${errMsg} | ${errTextFromResponse}`.trim()
+
   return err
-  // return err.response
-  //   ? err.response.data
-  //     ? err.response.data
-  //     : err.response
-  //   : err
 }
 
 class Qiwi {
@@ -159,6 +162,43 @@ class Qiwi {
       result.outgoing[currency] = amount
 
     return result
+  }
+
+  /**
+   * Get operation history.
+   * Rows can be 1-50
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#payments_list
+   * @param {{rows:number, operation:string, sources:string, startDate:Date, endDate:Date, nextTxnDate:Date, nextTxnId:number}} params
+   * @areturns {{comment: string, status: string, statusText: string, total: {amount: number, currency: number}}[]}
+   */
+  async getOperations(params) {
+    const { data, nextTxnDate, nextTxnId } = await this.getOperationHistory(params)
+
+    /**
+     * @type {[]}
+     */
+    const data1 = data
+
+    return data1.map((t) => ({
+      date: t.date,
+      errorCode: t.errorCode,
+      error: t.error,
+      statusText: t.statusText,
+      account: t.account,
+      currency: Object
+        .entries(this.currencyCode)
+        .filter(([code, id]) => id === t.sum.currency)
+        .map(([code, id]) => code)[0] || `${t.sum.currency}`,
+      sum: t.sum?.amount,
+      comission: t.commission?.amount,
+      total: t.total.amount,
+      providerShortName: t.provider.shortName,
+      providerLongName: t.provider.longName,
+      comment: t.comment,
+      type: t.type,
+
+      rawData: t,
+    }))
   }
   // #endregion
 

@@ -23,6 +23,10 @@ utils.parseProxyStr = (_str) => {
 /**
  * @param {Number} num
  */
-utils.userFormatNumber = (num) => num.toLocaleString('ru-RU')
+utils.userFormatNumber = (num) => {
+  if (typeof num !== 'number')
+    return '0'
+  return num.toLocaleString('ru-RU')
+}
 
 module.exports = utils

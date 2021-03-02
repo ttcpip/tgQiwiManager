@@ -24,7 +24,10 @@ const promptDataText = dedent`
   ${bold(`Прокси`)} ${escape(` - ip:порт@логин:пароль`)}
 `
 
-wizardScene.enter(async (ctx) => await ctx.replyWithMarkdownV2(promptDataText, { reply_markup: getKBCancel() }))
+wizardScene.enter(async (ctx) => {
+  ctx.answerCbQuery().catch(() => {})
+  return await ctx.replyWithMarkdownV2(promptDataText, { reply_markup: getKBCancel() })
+})
 
 wizardScene.hears(/❌Отмена/i, async (ctx) => {
   await ctx.scene.leave() // чек отчистку сессии
