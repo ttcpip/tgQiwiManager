@@ -4,4 +4,5 @@ module.exports = {
   ignoreNonAdminUsers: require('./ignoreNonAdminUsers'),
   baseCmdsHandler: require('./baseCmdsHandler'),
   callbackQueryUtilCommandsHandler: require('./callbackQueryUtilCommandsHandler'),
+  adminCmdsHandler: require('./adminCmdsHandler'),
 }
