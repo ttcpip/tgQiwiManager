@@ -10,7 +10,7 @@ module.exports = async function walletsListHandler(ctx) {
   const accsInfo = qiwiAccsManager.getAllAccs()
     .map(([id, qiwi], i) => `${i + 1}) ${qiwi.wallet} ${id}`)
     .join('\n')
-  const text = `Аккаунты:\n${format.monospaceBlock(accsInfo)}`
+  const text = `📋 Аккаунты:\n${format.monospaceBlock(accsInfo)}`
   const KB = Markup.inlineKeyboard([
     [Markup.button.callback('Добавить киви', 'addQiwi')],
     [Markup.button.callback('Удалить киви', 'delQiwi')],

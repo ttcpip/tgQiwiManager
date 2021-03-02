@@ -10,7 +10,7 @@ module.exports = async function statListHandler(ctx) {
   const text = `❓ Для какого аккаунта запросить статистику?`
   const rows = qiwiAccsManager
     .getAllAccs()
-    .map(([id]) => [Markup.button.callback(id, `stats=${id}`)])
+    .map(([id]) => [Markup.button.callback(id, `accStats=${id}`)])
   const KB = Markup.inlineKeyboard([
     ...rows,
     [Markup.button.callback('Назад', `mainMenu`)],
