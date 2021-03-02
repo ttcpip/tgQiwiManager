@@ -18,7 +18,7 @@ module.exports = async function accStatsHandler(ctx) {
   if (!qiwiAccsManager.hasById(id))
     return await ctx.answerCbQuery(`Аккаунт с таким айди не найден`)
 
-  ctx.answerCbQuery(`⏳ Получение информации...`).then(() => console.log('sent cb query')).catch(() => {})
+  ctx.answerCbQuery(`⏳ Получение информации...`).catch(() => {})
 
   const qiwi = qiwiAccsManager.getById(id)
   const startDate = moment().startOf('month')
