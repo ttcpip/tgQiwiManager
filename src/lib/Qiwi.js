@@ -139,6 +139,27 @@ class Qiwi {
     //   comment: '',
     // })
   }
+
+  /**
+   * @param {{operation:string, sources:string, startDate:Date, endDate:Date}} params
+   * @returns {{ incoming: {[currency: string]: number}, outgoing: {[currency: string]: number}}}
+   */
+  async getStatistics(params) {
+    const data = await this.getOperationStatistics(params)
+    const { incomingTotal, outgoingTotal } = data
+
+    const result = {
+      incoming: {},
+      outgoing: {},
+    }
+
+    for (const { amount, currency } of incomingTotal)
+      result.incoming[currency] = amount
+    for (const { amount, currency } of outgoingTotal)
+      result.outgoing[currency] = amount
+
+    return result
+  }
   // #endregion
 
   // #region Raw qiwi api methods

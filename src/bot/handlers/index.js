@@ -3,4 +3,5 @@ module.exports = {
   walletsBalancesHandler: require('./walletsBalances'),
   withdrawHandler: require('./withdraw'),
   statListHandler: require('./statList'),
+  accStatsHandler: require('./accStats'),
 }
