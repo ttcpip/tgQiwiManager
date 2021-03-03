@@ -188,7 +188,7 @@ class QiwiAccsManager {
   }
 
   /**
-   * @returns {{ [id: string]: { balance: 0, err: null }}}
+   * @returns {{ [id: string]: { balance: number, err: null | Error }}}
    */
   async getAllBalances() {
     const accs = this.getAllAccs()
