@@ -1,7 +1,9 @@
+require('dotenv').config({ path: '.env' })
 const settings = require('./lib/settings').getInstance()
 const qiwiAccsManager = require('./lib/QiwiAccsManager').getInstance()
 
 const { initBot } = require('./bot')
+const config = require('./config')
 const { Qiwi } = require('./lib/Qiwi')
 
 const main = async () => {
@@ -27,7 +29,7 @@ const main = async () => {
   // const smth = await qiwi.getRubAccBalance()
   // console.log(smth)
 
-  const bot = await initBot(settings.data.tgBotToken)
+  const bot = await initBot(config.tgBotToken)
   await bot.launch({ allowedUpdates: ['callback_query', 'message'] })
   console.log(`Tg bot started: @${bot.botInfo.username}`)
 }
