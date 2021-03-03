@@ -4,4 +4,5 @@ module.exports = {
   addQiwi: require('./addQiwi'),
   delQiwi: require('./delQiwi'),
   proxyMain: require('./proxyMain'),
+  accAutoWithdraw: require('./accAutoWithdraw'),
 }

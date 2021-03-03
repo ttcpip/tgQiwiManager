@@ -29,6 +29,10 @@ module.exports.initBot = function initBot(token) {
   bot.action(/accStats=(.+)/, handlers.accStatsHandler)
   bot.action(/historyList=(.+)/, handlers.historyListHandler)
   bot.action(/accHistory=(.+)=(.+)/, handlers.accHistoryHandler)
+  bot.action('autoWithdrawList', handlers.autoWithdrawListHandler)
+  bot.action(/accAutoWithdraw=(.+)/, handlers.accAutoWithdrawHandler)
+  bot.action(/onOffAutoWithdraw=(.+)/, handlers.onOffAutoWithdrawHandler)
+  bot.action(/changeAutoWithdrawThresholdAndCard=(.+)/, handlers.changeAutoWithdrawThresholdAndCardHandler)
 
   // Defaults
   bot.on('message', Stage.enter('MAIN_MENU_SCENE_ID'))

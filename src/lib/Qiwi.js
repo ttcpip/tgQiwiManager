@@ -118,28 +118,12 @@ class Qiwi {
     return rubs
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  async sendRubToCard({ amount, card }) {
-    // const err = new Error(`Err from sendRubToCard`)
-    // err.response = {
-    //   data: {
-    //     dataErr: 'aspdasd',
-    //     dataSmth: ['dasd', 111, 22335],
-    //   },
-    // }
-    // throw err
-    // console.log(`Mocking call to this.toCard with params: `)
-    // console.log({ amount, account: card })
-
-    // return {
-    //   mockAmount: amount,
-    //   mockAccount: card,
-    //   mockComment: '',
-    // }
+  async sendRubToCard({ amount, card, providerId }) {
     return await this.toCard({
       amount,
       account: card,
       comment: '',
+      providerId,
     })
   }
 
@@ -436,13 +420,14 @@ class Qiwi {
   /**
    * Send to card
    * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#cards
-   * @param {{amount:number, comment:string, account:string}} requestOptions
+   * @param {{amount:number, comment:string, account:string, providerId: number}} requestOptions
    */
   async toCard(requestOptions) {
     try {
-      const card = await this.detectCard(requestOptions.account)
+      const providerId = requestOptions.providerId || (await this.detectCard(requestOptions.account)).providerId
+
       const options = {
-        url: `${this.apiUri}/sinap/terms/${card.message}/payments`,
+        url: `${this.apiUri}/sinap/terms/${providerId}/payments`,
         body: {
           id: (1000 * Date.now()).toString(),
           sum: {

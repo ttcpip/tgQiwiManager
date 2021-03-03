@@ -1,3 +1,4 @@
+const dedent = require('dedent')
 const TaskLoop = require('../lib/TaskLoop')
 
 class AutoWithdraw {
@@ -12,7 +13,7 @@ class AutoWithdraw {
   constructor(params) {
     this.params = params
     this.loop = new TaskLoop({
-      intervalMs: 2500,
+      intervalMs: 20000,
       taskFn: this._loopFn.bind(this),
       onTaskErrorCallback: (err) => console.error(`Error at AutoWithdraw: `, err),
     })
@@ -25,18 +26,18 @@ class AutoWithdraw {
   async _loopFn() {
     const nowTimeS = Math.trunc(Date.now() / 1000)
     const accsToCheck = this.params.qiwiAccsManager.getAllAccs()
-      .filter(([_, qiwi]) => qiwi.allParams.autoWithdraw
-        && qiwi.allParams.autoWithdraw.on
-        && Number.isFinite(qiwi.allParams.autoWithdraw.thresholdToWithdraw)
-        && qiwi.allParams.autoWithdraw.card
-        && nowTimeS - qiwi.allParams.autoWithdraw.lastTimeCheckBalance > this.params.checkBalanceIntervalMs / 1000)
+      .filter(([id]) => this.params.settings.data.qiwiAccs[id].autoWithdraw
+        && this.params.settings.data.qiwiAccs[id].autoWithdraw.on
+        && Number.isFinite(this.params.settings.data.qiwiAccs[id].autoWithdraw.thresholdToWithdraw)
+        && this.params.settings.data.qiwiAccs[id].autoWithdraw.card
+        && nowTimeS - this.params.settings.data.qiwiAccs[id].autoWithdraw.lastTimeCheckBalance > this.params.checkBalanceIntervalMs / 1000)
 
     if (accsToCheck.length <= 0)
       return
 
     const promises = accsToCheck.map(([id, qiwi]) => Promise.resolve().then(async () => {
       try {
-        const { thresholdToWithdraw: threshold, card } = qiwi.allParams.autoWithdraw
+        const { thresholdToWithdraw: threshold, card } = this.params.settings.data.qiwiAccs[id].autoWithdraw
 
         const balance = await qiwi.getRubAccBalance()
         this.params.settings.data.qiwiAccs[id].autoWithdraw.lastTimeCheckBalance = Math.trunc(Date.now() / 1000)
@@ -62,7 +63,11 @@ class AutoWithdraw {
           providerId,
         })
 
-        const text = ``
+        const text = dedent`
+          ✅ Успешный авто-вывод ${amountToWithdraw} руб с кошелька ${qiwi.wallet} (${id}).
+          Баланс до вывода: ${balance}
+          Комиссия перевода: ${comission}
+        `
         this.params.settings.data.tgAdminChatIds.forEach((chat) => this.params.tgClient.sendMessage(chat, text).catch(() => {}))
       } catch (err) {
         console.error(`When processing auto withdraw. Wallet: ${qiwi.wallet} (${id}): `)

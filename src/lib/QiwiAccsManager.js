@@ -53,13 +53,19 @@ class QiwiAccsManager {
 
     const qiwiData = {
       token,
+      wallet,
       proxy: {
         host: ip,
         port,
         userId: username,
         password,
       },
-      wallet,
+      autoWithdraw: {
+        on: false,
+        thresholdToWithdraw: null,
+        card: '',
+        lastTimeCheckBalance: 0,
+      },
     }
     const qiwi = new Qiwi(qiwiData)
     this.add(id, qiwi)

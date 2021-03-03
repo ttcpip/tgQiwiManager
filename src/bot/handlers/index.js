@@ -6,4 +6,8 @@ module.exports = {
   accStatsHandler: require('./accStats'),
   historyListHandler: require('./historyList'),
   accHistoryHandler: require('./accHistory'),
+  autoWithdrawListHandler: require('./autoWithdrawList'),
+  accAutoWithdrawHandler: require('./accAutoWithdraw'),
+  onOffAutoWithdrawHandler: require('./onOffAutoWithdraw'),
+  changeAutoWithdrawThresholdAndCardHandler: require('./changeAutoWithdrawThresholdAndCard'),
 }
