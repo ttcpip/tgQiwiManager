@@ -9,9 +9,9 @@ module.exports.initBot = function initBot(token) {
   // Middlewares
   bot.use(middlewares.logErrors)
   bot.use(middlewares.logUpdates)
+  bot.on('text', middlewares.baseCmdsHandler)
   bot.use(middlewares.ignoreNonAdminUsers)
   bot.on('callback_query', middlewares.callbackQueryUtilCommandsHandler)
-  bot.on('text', middlewares.baseCmdsHandler)
   bot.on('text', middlewares.adminCmdsHandler)
 
   // Scenes
