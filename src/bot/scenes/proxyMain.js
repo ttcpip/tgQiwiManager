@@ -19,7 +19,6 @@ const getKBCancel = (isWithConfirm = false) => {
 const getMainKb = () => Markup.inlineKeyboard([
   [Markup.button.callback('Проверить валидность', 'checkValid')],
   [Markup.button.callback('Установить для аккаунта', 'setForAcc')],
-  // [Markup.button.callback('❌Отмена', 'cancel')],
 ]).reply_markup
 
 const promptProxyText = `Введите прокси в формате: ${escape(`ip:порт@логин:пароль`)}`
@@ -44,10 +43,6 @@ const sceneMainMenuHandler = async (ctx) => {
 wizardScene.enter(async (ctx) => await ctx.replyWithMarkdownV2(promptProxyText, { reply_markup: getKBCancel() }))
 
 wizardScene.hears(/❌Отмена/i, async (ctx) => {
-  await ctx.scene.leave()
-  return await ctx.scene.enter('MAIN_MENU_SCENE_ID')
-})
-wizardScene.action('cancel', async (ctx) => {
   await ctx.scene.leave()
   return await ctx.scene.enter('MAIN_MENU_SCENE_ID')
 })
