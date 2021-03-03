@@ -46,6 +46,7 @@ class Qiwi {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
     }
 
+    this.proxy = params.proxy
     this.setProxy({ type: 5, ...params.proxy })
 
     /**
@@ -141,9 +142,9 @@ class Qiwi {
     }
 
     for (const { amount, currency } of incomingTotal)
-      result.incoming[currency] = amount
+      result.incoming[this.getCurrencyNameById(currency)] = amount
     for (const { amount, currency } of outgoingTotal)
-      result.outgoing[currency] = amount
+      result.outgoing[this.getCurrencyNameById(currency)] = amount
 
     return result
   }
@@ -182,10 +183,7 @@ class Qiwi {
       error: t.error,
       statusText: t.statusText,
       account: t.account,
-      currency: Object
-        .entries(this.currencyCode)
-        .filter(([code, id]) => id === t.sum.currency)
-        .map(([code, id]) => code)[0] || `${t.sum.currency}`,
+      currency: this.getCurrencyNameById(t.sum.currency),
       sum: t.sum?.amount,
       comission: t.commission?.amount,
       total: t.total.amount,
@@ -197,6 +195,13 @@ class Qiwi {
 
       rawData: t,
     }))
+  }
+
+  getCurrencyNameById(currId) {
+    return Object
+      .entries(this.currencyCode)
+      .filter(([code, id]) => id === currId)
+      .map(([code, id]) => code)[0] || `${currId}`
   }
   // #endregion
 
@@ -424,7 +429,11 @@ class Qiwi {
    */
   async toCard(requestOptions) {
     try {
-      const providerId = requestOptions.providerId || (await this.detectCard(requestOptions.account)).providerId
+      let { providerId } = requestOptions
+      if (!providerId) {
+        const temp = await this.detectCard(requestOptions.account)
+        providerId = temp.message
+      }
 
       const options = {
         url: `${this.apiUri}/sinap/terms/${providerId}/payments`,

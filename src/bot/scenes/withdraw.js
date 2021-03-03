@@ -36,11 +36,10 @@ wizardScene.hears(/✅Всё верно/i, async (ctx) => {
 
   const qiwi = qiwiAccsManager.getById(qiwiAccId)
   try {
-    const toCardAnswer = await qiwi.sendRubToCard({
+    await qiwi.sendRubToCard({
       amount,
       card,
     })
-    console.log({ toCardAnswer })
   } catch (err) {
     const errMsgText = err.message || err.description || '[no error text]'
     const errInfoText = err.response && err.response.data
@@ -52,7 +51,15 @@ wizardScene.hears(/✅Всё верно/i, async (ctx) => {
     `, { reply_markup: getKBCancel() })
   }
 
-  await ctx.reply(`Успешно отправлено ${bold(escape(amount.toString()))} руб с киви ${bold(escape(qiwi.wallet))} ${escape(`(${qiwiAccId})`)} на карту ${bold(escape(card))}`, {
+  let balanceErr = null
+  const balance = await qiwi.getRubAccBalance().catch((err) => { balanceErr = err; return 0 })
+  const balanceText = balanceErr ? `Ошибка: ${escape(balanceErr.message)}` : bold(escape(`${balance}₽`))
+
+  await ctx.reply(dedent`
+    ✅Успешно отправлено ${bold(escape(amount.toString()))} руб с киви ${bold(escape(qiwi.wallet))} ${escape(`(${qiwiAccId})`)} на карту ${bold(escape(card))}
+
+    💵Текущий баланс: ${balanceText}
+  `, {
     reply_markup: { remove_keyboard: true },
     parse_mode: 'MarkdownV2',
   })

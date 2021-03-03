@@ -43,7 +43,7 @@ module.exports = async function accHistoryHandler(ctx) {
       sum, currency, account, providerShortName, statusText, comment, error, date, typeText,
     }, i) => dedent`
       ${i + 1}) ${userFormatNumber(sum)} ${currency} на ${account}
-      Дата: ${moment(date).format()}
+      Дата: ${moment(date).tz('Europe/Moscow').format()}
       Тип: ${typeText}
       Провайдер: ${providerShortName}
       Статус: ${statusText} ${f('\nКомментарий: ', comment)} ${f('\nОшибка: ', error)}

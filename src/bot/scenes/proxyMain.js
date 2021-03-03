@@ -6,7 +6,7 @@ const settings = require('../../lib/settings').getInstance()
 const { parseProxyStr } = require('../../lib/utils')
 const { Qiwi } = require('../../lib/Qiwi')
 
-const { escape, bold, monospace } = format
+const { escape, bold, monospaceBlock } = format
 const boldEscape = (str) => bold(escape(str))
 const wizardScene = new Scenes.BaseScene('PROXY_MAIN_SCENE_ID')
 const getKBCancel = (isWithConfirm = false) => {
@@ -40,7 +40,18 @@ const sceneMainMenuHandler = async (ctx) => {
     : await ctx.replyWithMarkdownV2(text, { reply_markup: getMainKb(), parse_mode: 'MarkdownV2' })
 }
 
-wizardScene.enter(async (ctx) => await ctx.replyWithMarkdownV2(promptProxyText, { reply_markup: getKBCancel() }))
+wizardScene.enter(async (ctx) => {
+  const proxiesText = qiwiAccsManager.getAllAccs()
+    .map(([id, {
+      wallet, proxy: {
+        host, port, userId, password,
+      },
+    }]) => `${wallet} (${id}) ${host}:${port}@${userId}:${password}`)
+    .join('\n')
+
+  await ctx.replyWithMarkdownV2(`${escape('Текущие прокси:')}\n${monospaceBlock(proxiesText)}`)
+  return await ctx.replyWithMarkdownV2(promptProxyText, { reply_markup: getKBCancel() })
+})
 
 wizardScene.hears(/❌Отмена/i, async (ctx) => {
   await ctx.scene.leave()

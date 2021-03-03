@@ -5,7 +5,7 @@ const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const moment = require('../../lib/moment')
 const { userFormatNumber } = require('../../lib/utils')
 
-const { escape, bold, monospaceBlock } = format
+const { escape, bold, monospace } = format
 const boldEscape = (str) => bold(escape(str))
 
 /**
@@ -21,8 +21,8 @@ module.exports = async function accStatsHandler(ctx) {
   ctx.answerCbQuery(`⏳ Получение информации...`).catch(() => {})
 
   const qiwi = qiwiAccsManager.getById(id)
-  const startDate = moment().startOf('month')
-  const endDate = moment().endOf('month')
+  const startDate = moment().tz('Europe/Moscow').startOf('month')
+  const endDate = moment().tz('Europe/Moscow').endOf('month')
   let err = null
   const { incoming, outgoing } = await qiwi.getStatistics({
     startDate: startDate.toDate(),
@@ -41,9 +41,9 @@ module.exports = async function accStatsHandler(ctx) {
   const outcomingText = Object.entries(outgoing).map(([curr, num]) => `${userFormatNumber(num)} ${curr}`).join('\n')
   const text = dedent`
     📊 Статистика с ${boldEscape(startDate.format())} по ${boldEscape(endDate.format())}
-
-    ${boldEscape('Доходы:')} ${monospaceBlock(incomingText)}
-    ${boldEscape('Расходы:')} ${monospaceBlock(outcomingText)}
+    
+    ${boldEscape('Доходы:')} ${monospace(incomingText)}
+    ${boldEscape('Расходы:')} ${monospace(outcomingText)}
   `
   const KB = Markup.inlineKeyboard([[Markup.button.callback('Назад', `statList`)]]).reply_markup
 
