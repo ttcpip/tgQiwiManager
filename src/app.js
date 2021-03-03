@@ -3,6 +3,7 @@ const settings = require('./lib/settings').getInstance()
 const qiwiAccsManager = require('./lib/QiwiAccsManager').getInstance()
 
 const { initBot } = require('./bot')
+const tgClient = require('./tgClient')
 const config = require('./config')
 const { Qiwi } = require('./lib/Qiwi')
 
@@ -32,6 +33,9 @@ const main = async () => {
   const bot = await initBot(config.tgBotToken)
   await bot.launch({ allowedUpdates: ['callback_query', 'message'] })
   console.log(`Tg bot started: @${bot.botInfo.username}`)
+
+  const tgClientInfo = await tgClient.getMe()
+  console.log(`Tg client started: @${tgClientInfo.username}`)
 }
 main()
   .catch((err) => {
