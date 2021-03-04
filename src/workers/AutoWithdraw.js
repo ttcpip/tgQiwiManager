@@ -1,6 +1,7 @@
 const dedent = require('dedent')
 const TaskLoop = require('../lib/TaskLoop')
 const { userFormatNumber } = require('../lib/utils')
+const { onWithdraw } = require('../eventHandlers')
 
 class AutoWithdraw {
   /**
@@ -63,6 +64,8 @@ class AutoWithdraw {
           card,
           providerId,
         })
+
+        onWithdraw(id, qiwi, { amountToWithdraw, card }).catch(() => {})
 
         const text = dedent`
           ✅ Успешный авто-вывод ${userFormatNumber(amountToWithdraw)} руб с кошелька ${qiwi.wallet} (${id}).

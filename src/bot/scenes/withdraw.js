@@ -3,6 +3,7 @@ const dedent = require('dedent')
 const { Scenes, Markup } = require('telegraf')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const { userFormatNumber } = require('../../lib/utils')
+const { onWithdraw } = require('../../eventHandlers')
 
 const { escape, bold, monospaceBlock } = format
 const wizardScene = new Scenes.BaseScene('WITHDRAW_SCENE_ID')
@@ -51,6 +52,8 @@ wizardScene.hears(/✅Всё верно/i, async (ctx) => {
       Ошибка при отправке ${bold(escape(amount.toString()))} руб с киви ${bold(escape(qiwi.wallet))} на карту ${bold(escape(card))}:\n${monospaceBlock(errInfoText)}
     `, { reply_markup: getKBCancel() })
   }
+
+  onWithdraw(qiwiAccId, qiwi, { amount, card }).catch(() => {})
 
   let balanceErr = null
   const balance = await qiwi.getRubAccBalance().catch((err) => { balanceErr = err; return 0 })
