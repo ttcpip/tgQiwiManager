@@ -1,5 +1,6 @@
 const dedent = require('dedent')
 const TaskLoop = require('../lib/TaskLoop')
+const { userFormatNumber } = require('../lib/utils')
 
 class AutoWithdraw {
   /**
@@ -64,9 +65,9 @@ class AutoWithdraw {
         })
 
         const text = dedent`
-          ✅ Успешный авто-вывод ${amountToWithdraw} руб с кошелька ${qiwi.wallet} (${id}).
-          Баланс до вывода: ${balance}
-          Комиссия перевода: ${comission}
+          ✅ Успешный авто-вывод ${userFormatNumber(amountToWithdraw)} руб с кошелька ${qiwi.wallet} (${id}).
+          Баланс до вывода: ${userFormatNumber(balance)}
+          Комиссия перевода: ${userFormatNumber(comission)}
         `
         this.params.settings.data.tgAdminChatIds.forEach((chat) => this.params.tgClient.sendMessage(chat, text).catch(() => {}))
       } catch (err) {

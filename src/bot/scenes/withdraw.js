@@ -2,6 +2,7 @@ const { markdownv2: format } = require('telegram-format')
 const dedent = require('dedent')
 const { Scenes, Markup } = require('telegraf')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
+const { userFormatNumber } = require('../../lib/utils')
 
 const { escape, bold, monospaceBlock } = format
 const wizardScene = new Scenes.BaseScene('WITHDRAW_SCENE_ID')
@@ -53,10 +54,10 @@ wizardScene.hears(/✅Всё верно/i, async (ctx) => {
 
   let balanceErr = null
   const balance = await qiwi.getRubAccBalance().catch((err) => { balanceErr = err; return 0 })
-  const balanceText = balanceErr ? `Ошибка: ${escape(balanceErr.message)}` : bold(escape(`${balance}₽`))
+  const balanceText = balanceErr ? `Ошибка: ${escape(balanceErr.message)}` : bold(escape(`${userFormatNumber(balance)}₽`))
 
   await ctx.reply(dedent`
-    ✅Успешно отправлено ${bold(escape(amount.toString()))} руб с киви ${bold(escape(qiwi.wallet))} ${escape(`(${qiwiAccId})`)} на карту ${bold(escape(card))}
+    ✅Успешно отправлено ${bold(escape(userFormatNumber(amount)))} руб с киви ${bold(escape(qiwi.wallet))} ${escape(`(${qiwiAccId})`)} на карту ${bold(escape(card))}
 
     💵Текущий баланс: ${balanceText}
   `, {
