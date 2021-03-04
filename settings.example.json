@@ -11,6 +11,12 @@
         "port": "8080",
         "userId": "123",
         "password": "456"
+      },
+      "autoWithdraw": {
+        "on": false,
+        "thresholdToWithdraw": null,
+        "card": "",
+        "lastTimeCheckBalance": 0
       }
     }
   }
