@@ -9,16 +9,16 @@ wizardScene.enter(async (ctx) => {
   const extra = {
     reply_markup: Markup.inlineKeyboard([
       [
-        Markup.button.callback('Кошельки', 'walletsList'),
-        Markup.button.callback('Балансы', 'walletsBalances'),
+        Markup.button.callback('💰Кошельки', 'walletsList'),
+        Markup.button.callback('💵Балансы', 'walletsBalances'),
       ],
       [
-        Markup.button.callback('Прокси', '*delMsg*proxy'),
-        Markup.button.callback('Статистика', 'statList'),
+        Markup.button.callback('🌐Прокси', '*delMsg*proxy'),
+        Markup.button.callback('📊Статистика', 'statList'),
       ],
       [
-        Markup.button.callback('Авто-вывод', 'autoWithdrawList'),
-        Markup.button.callback('История', 'historyList=OUT'),
+        Markup.button.callback('🤖Авто-вывод', 'autoWithdrawList'),
+        Markup.button.callback('🧾История', 'historyList=OUT'),
       ],
     ]).reply_markup,
     parse_mode: 'MarkdownV2',
