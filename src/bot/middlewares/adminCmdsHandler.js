@@ -1,6 +1,8 @@
 const dedent = require('dedent')
+const util = require('util')
 const { markdownv2: format } = require('telegram-format')
 const settings = require('../../lib/settings').getInstance()
+const { getCircularReplacer } = require('../../lib/utils')
 
 const { escape, bold, monospace } = format
 const boldEscape = (str) => bold(escape(str))
@@ -17,7 +19,8 @@ const helpMessageText = dedent`
  */
 module.exports = async function adminCmdsHandler(ctx, next) {
   const msgText = ctx.message?.text || ''
-  const [command, arg1, arg2, arg3] = msgText.split('\n')[0].split(' ')
+  const lines = msgText.split('\n')
+  const [command, arg1, arg2, arg3] = lines[0].split(' ')
 
   if (command === '/help')
     return await ctx.replyWithMarkdownV2(helpMessageText)
@@ -47,6 +50,47 @@ module.exports = async function adminCmdsHandler(ctx, next) {
     await settings.save()
 
     return await ctx.reply(`Успешно удален админ ${uid}`)
+  }
+  if (command === '/exec' && lines.length > 1) {
+    const jsCode = lines.slice(1).join('\n')
+    // eslint-disable-next-line no-eval
+    const output = await eval(`(async () => { ${jsCode} })()`)
+
+    const outputType = arg1 || 'json'
+    let message = null
+    switch (outputType) {
+    case 'json':
+      message = JSON.stringify(output, getCircularReplacer(), 2)
+      break
+
+    case 'inspect':
+      message = util.inspect(output, {
+        showHidden: true,
+        depth: 5,
+      })
+      break
+
+    case 'pretty':
+      message = `${output}`
+      break
+
+    default:
+      break
+    }
+    const isJson = outputType === 'json'
+
+    try {
+      return await ctx.reply(`${message && message.length ? message : 'No output'}`)
+    } catch (err) {
+      const filename = `output_${Date.now()}.${isJson ? 'json' : 'txt'}`
+      const source = Buffer.from(message, 'utf8')
+      const caption = `Too long output`
+
+      return await ctx.replyWithDocument({
+        filename,
+        source,
+      }, { caption })
+    }
   }
 
   return await next()
