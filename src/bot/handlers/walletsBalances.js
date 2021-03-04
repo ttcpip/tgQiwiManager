@@ -2,6 +2,7 @@ const dedent = require('dedent')
 const { Markup } = require('telegraf')
 const { markdownv2: format } = require('telegram-format')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
+const { userFormatNumber } = require('../../lib/utils')
 
 /**
  * @param {import('telegraf').Context} ctx
@@ -24,10 +25,11 @@ module.exports = async function walletsBalancesHandler(ctx) {
     rows.push([Markup.button.callback(`Вывод с ${id}`, `withdraw=${id}`)])
   }
 
+  const total = Object.values(balances).reduce((p, c) => p + c.balance, 0)
   const text = dedent`
     ${format.bold('💰 Балансы: ')}
       
-    ${format.monospaceBlock(accsInfoText)}${format.monospaceBlock(`Всего: ${Object.values(balances).reduce((p, c) => p + c.balance, 0)} руб.`)}
+    ${format.monospaceBlock(accsInfoText)}${format.monospaceBlock(`Всего: ${userFormatNumber(total)} руб.`)}
   `
   const KB = Markup.inlineKeyboard([
     ...rows,

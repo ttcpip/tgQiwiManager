@@ -26,7 +26,9 @@ utils.parseProxyStr = (_str) => {
 utils.userFormatNumber = (num) => {
   if (typeof num !== 'number')
     return '0'
-  return num.toLocaleString('ru-RU')
+  return num.toLocaleString('ru-RU', {
+    maximumFractionDigits: 2,
+  })
 }
 
 module.exports = utils
