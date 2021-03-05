@@ -34,6 +34,15 @@ const main = async () => {
   autoWithdrawWorker.start()
   console.log(`Auto withdraw worker started with interval ${config.autoWithdrawCheckBalanceIntervalMs / 1000}s`)
 
+  const checkAccBanned = new workers.CheckAccBanned({
+    checkBannedIntervalMs: config.checkBannedIntervalMs,
+    qiwiAccsManager,
+    settings,
+    tgClient,
+  })
+  checkAccBanned.start()
+  console.log(`Check acc banned worker started with interval ${config.checkBannedIntervalMs / 1000}s`)
+
   console.log(`↑ Initialization ended after ${Date.now() - startTime}ms ↑`)
 }
 main()

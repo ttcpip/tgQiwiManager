@@ -108,6 +108,20 @@ class Qiwi {
   }
 
   // #region Top level methods
+  /**
+   * @returns {{
+   *  isBanned: bool,
+   *  restrictions: { restrictionCode: string, restrictionDescription: string}[]
+   * }}
+   */
+  async isAccountBanned() {
+    const restrictions = await this.getRestrictions()
+    return {
+      isBanned: restrictions.length > 0,
+      restrictions,
+    }
+  }
+
   async getRubAccBalance() {
     const { accounts } = await this.getAccounts()
 
@@ -206,6 +220,17 @@ class Qiwi {
   // #endregion
 
   // #region Raw qiwi api methods
+  /**
+   * Get restrictions
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#restrictions
+   * @returns {{ restrictionCode: string, restrictionDescription: string}[]}
+   */
+  async getRestrictions() {
+    const options = { url: `${this.apiUri}/person-profile/v1/persons/${this.wallet}/status/restrictions` }
+    const arr = await this.get(options)
+    return arr
+  }
+
   /**
    * Get P2P token
    * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#invoice
