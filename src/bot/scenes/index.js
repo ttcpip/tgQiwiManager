@@ -5,4 +5,5 @@ module.exports = {
   delQiwi: require('./delQiwi'),
   proxyMain: require('./proxyMain'),
   accAutoWithdraw: require('./accAutoWithdraw'),
+  accKeyPaid: require('./accKeyPair'),
 }

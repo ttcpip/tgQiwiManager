@@ -207,6 +207,21 @@ class Qiwi {
 
   // #region Raw qiwi api methods
   /**
+   * Get P2P token
+   * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#invoice
+   * @param {{ keysPairName: string, serverNotificationsUrl?: string }} requestOptions
+   * @returns {{ publicKey: string, secretKey: string }}
+   */
+  async getProtectedKeys(requestOptions) {
+    const options = {
+      url: `${this.apiUri}/widgets-api/api/p2p/protected/keys/create`,
+      body: requestOptions,
+    }
+    const { result } = await this.post(options)
+    return result
+  }
+
+  /**
    * Get identification data
    * @link https://developer.qiwi.com/ru/qiwi-wallet-personal/index.html#ident_data
    */

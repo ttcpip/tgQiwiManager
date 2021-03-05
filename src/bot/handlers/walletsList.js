@@ -14,6 +14,7 @@ module.exports = async function walletsListHandler(ctx) {
   const KB = Markup.inlineKeyboard([
     [Markup.button.callback('Добавить киви', '*delKb*addQiwi')],
     [Markup.button.callback('Удалить киви', '*delKb*delQiwi')],
+    [Markup.button.callback('Создать ключи', 'keyPairList')],
     [Markup.button.callback('Назад', 'mainMenu')],
   ]).reply_markup
 

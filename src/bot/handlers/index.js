@@ -10,4 +10,6 @@ module.exports = {
   accAutoWithdrawHandler: require('./accAutoWithdraw'),
   onOffAutoWithdrawHandler: require('./onOffAutoWithdraw'),
   changeAutoWithdrawThresholdAndCardHandler: require('./changeAutoWithdrawThresholdAndCard'),
+  keyPairListHandler: require('./keyPairList'),
+  accKeyPairHandler: require('./accKeyPair'),
 }
