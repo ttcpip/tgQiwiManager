@@ -19,5 +19,6 @@
         "lastTimeCheckBalance": 0
       }
     }
-  }
+  },
+  "qiwiDomains": []
 }

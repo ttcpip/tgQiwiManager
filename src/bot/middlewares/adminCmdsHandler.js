@@ -11,6 +11,11 @@ const helpMessageText = dedent`
   ${boldEscape('/adminList')} ${monospace('- посмотреть список админов')}
   ${boldEscape('/adminAdd [uid]')} ${monospace('- добавить админа')}
   ${boldEscape('/adminDel [uid]')} ${monospace('- удалить админа')}
+
+  ${boldEscape('/domainList')} ${monospace('- посмотреть список киви доменов')}
+  ${boldEscape('/domainAdd [domain]')} ${monospace('- добавить домен')}
+  ${boldEscape('/domainDel [domain]')} ${monospace('- удалить домен')}
+
 `
 
 /**
@@ -91,6 +96,37 @@ module.exports = async function adminCmdsHandler(ctx, next) {
         source,
       }, { caption })
     }
+  }
+
+  if (command === '/domainList') {
+    const qiwiDomainsText = settings.data.qiwiDomains
+      .map((domain, i) => `${i + 1}\\) ${monospace(String(domain))}`)
+      .join('\n')
+    return await ctx.replyWithMarkdownV2(`Киви домены:\n${qiwiDomainsText}`)
+  }
+  if (command === '/domainAdd') {
+    const domain = arg1
+    const index = settings.data.qiwiDomains.indexOf(domain)
+    if (index >= 0)
+      return await ctx.reply(`Домен уже есть в списке`)
+    if (!domain)
+      return await ctx.reply(`Некорректно введен домен`)
+
+    settings.data.qiwiDomains.push(domain)
+    await settings.save()
+
+    return await ctx.replyWithMarkdownV2(`Домен добавлен: ${monospace(domain)}`)
+  }
+  if (command === '/domainDel') {
+    const domain = arg1
+    const index = settings.data.qiwiDomains.indexOf(domain)
+    if (index < 0)
+      return await ctx.reply(`Домен для удаления не найден`)
+
+    settings.data.qiwiDomains.splice(index, 1)
+    await settings.save()
+
+    return await ctx.replyWithMarkdownV2(`Домен удален: ${monospace(domain)}`)
   }
 
   return await next()
