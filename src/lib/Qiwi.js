@@ -434,32 +434,28 @@ class Qiwi {
    * @param {{amount:number, comment:string, account:string}} requestOptions
    */
   async toMobilePhone(requestOptions) {
-    try {
-      const operator = await this.detectOperator(`7${requestOptions.account}`)
-      const options = {
-        url: `${this.apiUri}/sinap/terms/${operator.message}/payments`,
-        body: {
-          id: (1000 * Date.now()).toString(),
-          sum: {
-            amount: requestOptions.amount,
-            currency: '643',
-          },
-          source: 'account_643',
-          paymentMethod: {
-            type: 'Account',
-            accountId: '643',
-          },
-          comment: requestOptions.comment,
-          fields: {
-            account: requestOptions.account,
-          },
+    const operator = await this.detectOperator(`7${requestOptions.account}`)
+    const options = {
+      url: `${this.apiUri}/sinap/terms/${operator.message}/payments`,
+      body: {
+        id: (1000 * Date.now()).toString(),
+        sum: {
+          amount: requestOptions.amount,
+          currency: '643',
         },
-      }
-
-      return this.post(options)
-    } catch (error) {
-      throw getWhatToThrow(error)
+        source: 'account_643',
+        paymentMethod: {
+          type: 'Account',
+          accountId: '643',
+        },
+        comment: requestOptions.comment,
+        fields: {
+          account: requestOptions.account,
+        },
+      },
     }
+
+    return await this.post(options)
   }
 
   /**
@@ -468,37 +464,33 @@ class Qiwi {
    * @param {{amount:number, comment:string, account:string, providerId: number}} requestOptions
    */
   async toCard(requestOptions) {
-    try {
-      let { providerId } = requestOptions
-      if (!providerId) {
-        const temp = await this.detectCard(requestOptions.account)
-        providerId = temp.message
-      }
-
-      const options = {
-        url: `${this.apiUri}/sinap/terms/${providerId}/payments`,
-        body: {
-          id: (1000 * Date.now()).toString(),
-          sum: {
-            amount: requestOptions.amount,
-            currency: '643',
-          },
-          source: 'account_643',
-          paymentMethod: {
-            type: 'Account',
-            accountId: '643',
-          },
-          comment: requestOptions.comment,
-          fields: {
-            account: requestOptions.account,
-          },
-        },
-      }
-
-      return this.post(options)
-    } catch (error) {
-      throw getWhatToThrow(error)
+    let { providerId } = requestOptions
+    if (!providerId) {
+      const temp = await this.detectCard(requestOptions.account)
+      providerId = temp.message
     }
+
+    const options = {
+      url: `${this.apiUri}/sinap/terms/${providerId}/payments`,
+      body: {
+        id: (1000 * Date.now()).toString(),
+        sum: {
+          amount: requestOptions.amount,
+          currency: '643',
+        },
+        source: 'account_643',
+        paymentMethod: {
+          type: 'Account',
+          accountId: '643',
+        },
+        comment: requestOptions.comment,
+        fields: {
+          account: requestOptions.account,
+        },
+      },
+    }
+
+    return await this.post(options)
   }
 
   /**
@@ -832,18 +824,11 @@ class Qiwi {
       },
     }
 
-    const errorMessage = 'Can\'t detect operator'
-    try {
-      const result = await this.post(options)
-      if (result.code.value == '2')
-        throw new Error(errorMessage)
-      return result
-    } catch (error) {
-      if (error.message != undefined && error.message == errorMessage)
-        throw getWhatToThrow(error)
+    const result = await this.post(options)
+    if (result.code.value == '2')
+      throw getWhatToThrow(new Error(`Can't detect operator`))
 
-      throw getWhatToThrow(error)
-    }
+    return result
   }
 
   /**
@@ -858,18 +843,10 @@ class Qiwi {
       },
     }
 
-    const errorMessage = 'Wrong card number'
-    try {
-      const result = await this.post(options)
-      if (result.code.value == '2')
-        throw new Error(errorMessage)
-      return result
-    } catch (error) {
-      if (error.message != undefined && error.message == errorMessage)
-        throw getWhatToThrow(error)
-
-      throw getWhatToThrow(error)
-    }
+    const result = await this.post(options)
+    if (result.code.value == '2')
+      throw getWhatToThrow(new Error('Wrong card number'))
+    return result
   }
   // #endregion
 
