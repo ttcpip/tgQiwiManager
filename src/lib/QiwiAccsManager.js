@@ -1,20 +1,25 @@
 const { Qiwi } = require('./Qiwi')
 
 class QiwiAccsManager {
-  constructor() {
+  /**
+   * @param {import('../eventHandlers/onQiwiApiError')} onQiwiApiError
+   */
+  constructor(onQiwiApiError) {
+    this.onQiwiApiError = onQiwiApiError
     this.accs = new Map()
     this.walletNumbers = new Map()
   }
 
   /**
    * Returns the same instance of QiwiAccsManager every time
+   * @param {import('../eventHandlers/onQiwiApiError')} onQiwiApiError
    * @returns {QiwiAccsManager} QiwiAccsManager instance
    */
-  static getInstance() {
+  static getInstance(onQiwiApiError) {
     const INSTANCE_SYMB_KEY = Symbol.for('My.App.Namespace.QiwiAccsManager_SYMB_KEY')
 
     if (!global[INSTANCE_SYMB_KEY])
-      global[INSTANCE_SYMB_KEY] = new QiwiAccsManager()
+      global[INSTANCE_SYMB_KEY] = new QiwiAccsManager(onQiwiApiError)
 
     return global[INSTANCE_SYMB_KEY]
   }
@@ -31,6 +36,8 @@ class QiwiAccsManager {
 
     this.accs.set(id, qiwi)
     this.walletNumbers.set(qiwi.wallet, id)
+
+    qiwi.onErrorCallback = (error, requestOptions) => this.onQiwiApiError(id, qiwi, requestOptions, error)
   }
 
   /**

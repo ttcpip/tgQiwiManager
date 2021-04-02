@@ -1,6 +1,7 @@
 require('dotenv').config({ path: '.env' })
 const settings = require('./lib/settings').getInstance()
-const qiwiAccsManager = require('./lib/QiwiAccsManager').getInstance()
+const eventHandlers = require('./eventHandlers')
+const qiwiAccsManager = require('./lib/QiwiAccsManager').getInstance(eventHandlers.onQiwiApiError)
 
 const { initBot } = require('./bot')
 const tgClient = require('./tgClient')
