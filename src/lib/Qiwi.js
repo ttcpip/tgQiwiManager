@@ -107,6 +107,22 @@ class Qiwi {
     }
   }
 
+  /**
+   * @param {Error} error
+   * @param {Object} requestOptions
+  */
+  async callOnErrorCallback(error, requestOptions) {
+    if (typeof this.onErrorCallback === 'function') {
+      try {
+        await this.onErrorCallback(error, requestOptions)
+        // eslint-disable-next-line no-empty
+      } catch (err) { }
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  onErrorCallback() { }
+
   // #region Top level methods
   /**
    * @returns {{
@@ -871,7 +887,9 @@ class Qiwi {
 
       return result.data
     } catch (error) {
-      throw getWhatToThrow(error)
+      const whatToThrow = getWhatToThrow(error)
+      this.callOnErrorCallback(whatToThrow, options)
+      throw whatToThrow
     }
   }
 
@@ -887,7 +905,9 @@ class Qiwi {
 
       return result.data
     } catch (error) {
-      throw getWhatToThrow(error)
+      const whatToThrow = getWhatToThrow(error)
+      this.callOnErrorCallback(whatToThrow, options)
+      throw whatToThrow
     }
   }
 
@@ -903,7 +923,9 @@ class Qiwi {
 
       return result.data
     } catch (error) {
-      throw getWhatToThrow(error)
+      const whatToThrow = getWhatToThrow(error)
+      this.callOnErrorCallback(whatToThrow, options)
+      throw whatToThrow
     }
   }
 
@@ -919,7 +941,9 @@ class Qiwi {
 
       return result.data
     } catch (error) {
-      throw getWhatToThrow(error)
+      const whatToThrow = getWhatToThrow(error)
+      this.callOnErrorCallback(whatToThrow, options)
+      throw whatToThrow
     }
   }
 
@@ -935,7 +959,9 @@ class Qiwi {
 
       return result.data
     } catch (error) {
-      throw getWhatToThrow(error)
+      const whatToThrow = getWhatToThrow(error)
+      this.callOnErrorCallback(whatToThrow, options)
+      throw whatToThrow
     }
   }
   // #endregion
