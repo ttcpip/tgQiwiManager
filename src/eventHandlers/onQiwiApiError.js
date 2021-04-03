@@ -7,7 +7,7 @@ const tgClient = require('../tgClient')
 const moment = require('../lib/moment')
 const giwiAccsManager = require('../lib/QiwiAccsManager').getInstance()
 
-const { bold } = format
+const { escape, bold } = format
 const chance = new Chance()
 
 /**
@@ -77,12 +77,14 @@ module.exports = async function onQiwiApiError(id, qiwi, requestOptions, error) 
     })
     console.log(`at onQiwiApiError: set publicKey, secretKey, number via external api`)
 
+    const blockedQiwiText = bold(escape(`(${qiwi.wallet} ${id})`))
+    const newQiwiText = bold(escape(`(${newQiwiToUse.wallet} ${newQiwiToUseId})`))
     const text = dedent`
-      ‼️КАРАМБА КИВИ \\(${bold(qiwi.wallet)} ${bold(id)}\\) ЗАБЛОКИРОВАН‼️
+      ‼️КАРАМБА КИВИ ${blockedQiwiText} ЗАБЛОКИРОВАН‼️
 
-      ✅Новый киви \\(${bold(newQiwiToUse.wallet)} ${bold(newQiwiToUseId)}\\)
+      ✅Новый киви ${newQiwiText}
     `
-    settings.data.tgAdminChatIds.forEach((chat) => tgClient.sendMessage(chat, text, { parse_mode: 'MarkdownV2' }).catch(() => {}))
+    settings.data.tgAdminChatIds.forEach((chat) => tgClient.sendMessage(chat, text, { parse_mode: 'MarkdownV2' }).catch(console.error))
   } catch (err) {
     console.error(`At onQiwiApiError event handler for qiwi id ${id}, wallet ${qiwi.wallet}: `)
     console.error(err)
