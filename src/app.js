@@ -1,11 +1,12 @@
 require('dotenv').config({ path: '.env' })
+const config = require('./config')
 const settings = require('./lib/settings').getInstance()
+require('./lib/ExternalApiClient').getInstance({ apiKey: config.externalApiKey })
 const eventHandlers = require('./eventHandlers')
 const qiwiAccsManager = require('./lib/QiwiAccsManager').getInstance(eventHandlers.onQiwiApiError)
 
 const { initBot } = require('./bot')
 const tgClient = require('./tgClient')
-const config = require('./config')
 const { Qiwi } = require('./lib/Qiwi')
 const workers = require('./workers')
 

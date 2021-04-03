@@ -6,4 +6,5 @@ module.exports = {
   autoWithdrawCheckBalanceIntervalMs: MINUTE_AS_MS,
   checkBannedIntervalMs: HOUR_AS_MS,
   withdrowedAmountToNotify: 165000,
+  externalApiKey: process.env.EXTERNAL_API_KEY,
 }
