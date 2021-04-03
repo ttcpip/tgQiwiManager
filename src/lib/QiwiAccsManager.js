@@ -1,25 +1,20 @@
 const { Qiwi } = require('./Qiwi')
 
 class QiwiAccsManager {
-  /**
-   * @param {import('../eventHandlers/onQiwiApiError')} onQiwiApiError
-   */
-  constructor(onQiwiApiError) {
-    this.onQiwiApiError = onQiwiApiError
+  constructor() {
     this.accs = new Map()
     this.walletNumbers = new Map()
   }
 
   /**
    * Returns the same instance of QiwiAccsManager every time
-   * @param {import('../eventHandlers/onQiwiApiError')} onQiwiApiError
    * @returns {QiwiAccsManager} QiwiAccsManager instance
    */
-  static getInstance(onQiwiApiError) {
+  static getInstance() {
     const INSTANCE_SYMB_KEY = Symbol.for('My.App.Namespace.QiwiAccsManager_SYMB_KEY')
 
     if (!global[INSTANCE_SYMB_KEY])
-      global[INSTANCE_SYMB_KEY] = new QiwiAccsManager(onQiwiApiError)
+      global[INSTANCE_SYMB_KEY] = new QiwiAccsManager()
 
     return global[INSTANCE_SYMB_KEY]
   }
@@ -29,6 +24,9 @@ class QiwiAccsManager {
    * @param {import('./Qiwi').Qiwi} qiwi
    */
   add(id, qiwi) {
+    if (!this.onQiwiApiError)
+      throw new Error(`onQiwiApiError is not set. Set it before adding accounts`)
+
     if (this.accs.has(id))
       throw new Error(`Already have account with id "${id}"`)
     if (this.walletNumbers.has(qiwi.wallet))

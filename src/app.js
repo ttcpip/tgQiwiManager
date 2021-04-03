@@ -2,8 +2,8 @@ require('dotenv').config({ path: '.env' })
 const config = require('./config')
 const settings = require('./lib/settings').getInstance()
 require('./lib/ExternalApiClient').getInstance({ apiKey: config.externalApiKey })
+const qiwiAccsManager = require('./lib/QiwiAccsManager').getInstance()
 const eventHandlers = require('./eventHandlers')
-const qiwiAccsManager = require('./lib/QiwiAccsManager').getInstance(eventHandlers.onQiwiApiError)
 
 const { initBot } = require('./bot')
 const tgClient = require('./tgClient')
@@ -14,6 +14,7 @@ const main = async () => {
   const startTime = Date.now()
   console.log(`↓ Initialization started ↓`)
 
+  qiwiAccsManager.onQiwiApiError = eventHandlers.onQiwiApiError
   for (const id in settings.data.qiwiAccs) {
     const qiwi = new Qiwi(settings.data.qiwiAccs[id])
     qiwiAccsManager.add(id, qiwi)
