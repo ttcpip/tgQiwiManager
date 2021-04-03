@@ -16,6 +16,8 @@ const helpMessageText = dedent`
   ${boldEscape('/domainAdd [domain]')} ${monospace('- добавить домен')}
   ${boldEscape('/domainDel [domain]')} ${monospace('- удалить домен')}
 
+  ${boldEscape('/qiwiChanging')} ${monospace('- вкл/выкл автоматическую смену киви в майнботе')}
+
 `
 
 /**
@@ -128,6 +130,12 @@ module.exports = async function adminCmdsHandler(ctx, next) {
       await settings.save()
 
       return await ctx.replyWithMarkdownV2(`Домен удален: ${monospace(domain)}`)
+    }
+
+    if (command === '/qiwiChanging') {
+      settings.data.qiwiChangingOn = !settings.data.qiwiChangingOn
+      await settings.save()
+      return await ctx.reply(`Теперь автоматическая смена киви ${settings.data.qiwiChangingOn ? 'включена' : 'выключена'}`)
     }
   } catch (err) {
     console.error(`Err at adminCmdsHandler():`)

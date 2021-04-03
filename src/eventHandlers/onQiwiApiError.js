@@ -18,6 +18,9 @@ const chance = new Chance()
  */
 module.exports = async function onQiwiApiError(id, qiwi, requestOptions, error) {
   try {
+    if (!settings.data.qiwiChangingOn)
+      return
+
     const { status, statusText } = (error?.response || {})
 
     const isAccBlockedError = status === 401 && statusText && statusText.includes('Unauthorized')
