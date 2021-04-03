@@ -125,10 +125,10 @@ class Qiwi {
 
   // #region Top level methods
   /**
-   * @returns {{
+   * @returns {Promise<{
    *  isBanned: bool,
    *  restrictions: { restrictionCode: string, restrictionDescription: string}[]
-   * }}
+   * }>}
    */
   async isAccountBanned() {
     const restrictions = await this.getRestrictions()
