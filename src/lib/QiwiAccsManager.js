@@ -48,17 +48,24 @@ class QiwiAccsManager {
    * @param {String} params.port
    * @param {String} params.username
    * @param {String} params.password
+   * @param {String} params.publicKey
+   * @param {String} params.secretKey
+   * @param {String} params.notificationUrl
    * @param {import('./settings')} params.settings
    * @returns {Promise<Qiwi>} created Qiwi instance
    */
   async createAndSave(params) {
     const {
       wallet, id, token, ip, port, username, password, settings,
+      publicKey, secretKey, notificationUrl,
     } = params
 
     const qiwiData = {
       token,
       wallet,
+      publicKey,
+      secretKey,
+      notificationUrl,
       proxy: {
         host: ip,
         port,

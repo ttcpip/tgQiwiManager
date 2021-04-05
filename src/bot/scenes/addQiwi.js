@@ -5,7 +5,9 @@ const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
 const { parseProxyStr } = require('../../lib/utils')
 
-const { escape, bold, monospace } = format
+const {
+  escape, bold, monospace, monospaceBlock,
+} = format
 const boldEscape = (str) => bold(escape(str))
 const wizardScene = new Scenes.BaseScene('ADD_QIWI_SCENE_ID')
 const getKBCancel = (isWithConfirm = false) => {
@@ -18,10 +20,11 @@ const getKBCancel = (isWithConfirm = false) => {
 
 const promptDataText = dedent`
   Введите киви для добавления в формате:
-  ${monospace(`[номер] [примечание] [токен] [прокси]`)}
+  ${monospaceBlock(`[номер] [примечание] [токен] [прокси]\n[?публичный ключ] [?секретный ключ] [?url оповещений]`)}
 
   ${bold(`Номер`)} ${escape(` - без "+", с 7 в начале.`)}
   ${bold(`Прокси`)} ${escape(` - ip:порт@логин:пароль`)}
+  ${bold(`URL оповещений`)} ${escape(` - /example_url`)}
 `
 
 wizardScene.enter(async (ctx) => {
@@ -37,13 +40,25 @@ wizardScene.hears(/❌Отмена/i, async (ctx) => {
 wizardScene.hears(/✅Всё верно/i, async (ctx) => {
   const {
     wallet, id, token, ip, port, username, password,
+    publicKey, secretKey, notificationUrl,
   } = ctx.scene.session.state
 
-  if (!wallet || !id || !token || !ip || !port || !username || !password)
+  if ((!wallet || !id || !token || !ip || !port || !username || !password)
+    || (publicKey && (!secretKey || !notificationUrl)))
     return await ctx.reply(`Данные устарели, попробуйте снова`, { reply_markup: getKBCancel(true) })
 
   await qiwiAccsManager.createAndSave({
-    wallet, id, token, ip, port, username, password, settings,
+    wallet,
+    id,
+    token,
+    ip,
+    port,
+    username,
+    password,
+    settings,
+    publicKey,
+    secretKey,
+    notificationUrl,
   })
 
   await ctx.reply(`✅ Аккаунт успешно добавлен`, {
@@ -55,7 +70,9 @@ wizardScene.hears(/✅Всё верно/i, async (ctx) => {
 })
 
 wizardScene.on('text', async (ctx) => {
-  const [wallet, id, token, proxyStr] = ctx.message.text.split(' ')
+  const lines = ctx.message.text.split('\n')
+  const [wallet, id, token, proxyStr] = lines[0].split(' ')
+  const [publicKey, secretKey, notificationUrl] = (lines[1] || '').split(' ')
   const {
     isOk: isValidProxy, ip, port, username, password,
   } = parseProxyStr(proxyStr)
@@ -68,6 +85,10 @@ wizardScene.on('text', async (ctx) => {
     return await ctx.reply(`Токен введен некорректно`)
   if (!isValidProxy)
     return await ctx.reply(`Прокси введены некорректно`)
+  if (publicKey && !secretKey)
+    return await ctx.reply(`Секретный ключ введен некорректно`)
+  if (publicKey && !notificationUrl)
+    return await ctx.reply(`URL оповещений введен некорректно`)
 
   if (qiwiAccsManager.hasById(id))
     return await ctx.reply(`Уже есть киви с таким примечанием`)
@@ -83,6 +104,9 @@ wizardScene.on('text', async (ctx) => {
     port,
     username,
     password,
+    publicKey,
+    secretKey,
+    notificationUrl,
   }
 
   const text = dedent`
@@ -91,6 +115,9 @@ wizardScene.on('text', async (ctx) => {
     • Примечание: ${boldEscape(id)}
     • Токен: ${boldEscape(token)}
     • Прокси: ${boldEscape(ip)}:${boldEscape(port)}@${boldEscape(username)}:${boldEscape(password)}
+    • Публичный ключ: ${boldEscape(publicKey || 'Не задан')}
+    • Секретный ключ: ${boldEscape(secretKey || 'Не задан')}
+    • URL оповещений: ${boldEscape(notificationUrl || 'Не задан')}
     ❓ Всё верно?
   `
   return await ctx.reply(text, { reply_markup: getKBCancel(true), parse_mode: 'MarkdownV2' })
