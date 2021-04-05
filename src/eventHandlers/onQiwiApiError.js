@@ -1,14 +1,11 @@
 const dedent = require('dedent')
 const { markdownv2: format } = require('telegram-format')
-const Chance = require('chance')
 const externalApiClient = require('../lib/ExternalApiClient').getInstance()
 const settings = require('../lib/settings').getInstance()
 const tgClient = require('../tgClient')
-const moment = require('../lib/moment')
 const giwiAccsManager = require('../lib/QiwiAccsManager').getInstance()
 
 const { escape, bold } = format
-const chance = new Chance()
 
 /**
  * @param {string} id
@@ -29,7 +26,15 @@ module.exports = async function onQiwiApiError(id, qiwi, requestOptions, error) 
     if (!isAccBlockedError && !isCantSendMoneyError)
       return console.log(`at onQiwiApiError: (!isAccBlockedError && !isCantSendMoneyError), exiting`)
 
-    const [newQiwiToUseId, newQiwiToUse] = giwiAccsManager.getAllAccs().find(([id_, qiwi_]) => id_ !== id && id_.includes('Запасной')) || []
+    const [newQiwiToUseId, newQiwiToUse] = giwiAccsManager.getAllAccs().find(([id_, qiwi_]) => {
+      const info = settings.data.qiwiAccs[id_]
+      return id_ !== id
+        && id_.includes('Запасной')
+        && info
+        && info.publicKey
+        && info.secretKey
+        && info.notificationUrl
+    }) || []
     if (!newQiwiToUse)
       return console.log(`at onQiwiApiError: (!newQiwiToUse), exiting`)
 
@@ -38,47 +43,21 @@ module.exports = async function onQiwiApiError(id, qiwi, requestOptions, error) 
     if (!isExternalBotUsesErroredQiwi)
       return console.log(`at onQiwiApiError: (!isExternalBotUsesErroredQiwi), exiting`)
 
-    const { lastUsedQiwiDomain, qiwiDomains } = settings.data
-    const lastUsedQiwiDomainIndex = qiwiDomains.indexOf(lastUsedQiwiDomain) > -1
-      ? qiwiDomains.indexOf(lastUsedQiwiDomain)
-      : qiwiDomains.length - 1
-    const indexToUse = lastUsedQiwiDomainIndex + 1 <= qiwiDomains.length - 1
-      ? lastUsedQiwiDomainIndex + 1
-      : 0
-    const domainToUse = qiwiDomains[indexToUse]
-
-    if (!domainToUse)
-      return console.log(`at onQiwiApiError: (!domainToUse), exiting`)
-
     const isNewQiwiBanned = await newQiwiToUse.isAccountBanned()
       .then(({ isBanned }) => isBanned)
       .catch(() => true)
     if (isNewQiwiBanned)
       return console.log(`at onQiwiApiError: (isNewQiwiBanned), exiting`)
 
-    const newCallbackUrl = `/${chance.string({ length: 5, pool: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_' })}`
-    const serverNotificationsUrl = `https://${domainToUse}${newCallbackUrl}`
+    const { notificationUrl, publicKey, secretKey } = settings.data.qiwiAccs[newQiwiToUseId]
 
     await externalApiClient.updateCurrentQiwi({
-      callbackUrl: newCallbackUrl,
-    })
-    console.log(`at onQiwiApiError: set callbackUrl via external api`)
-
-    const { publicKey, secretKey } = await newQiwiToUse.getProtectedKeys({
-      keysPairName: `Ключи на ${moment().format()}`,
-      serverNotificationsUrl,
-    })
-    console.log(`at onQiwiApiError: created publicKey, secretKey via qiwi api`)
-
-    settings.data.lastUsedQiwiDomain = domainToUse
-    await settings.save()
-
-    await externalApiClient.updateCurrentQiwi({
+      callbackUrl: notificationUrl,
       publicKey,
       secretKey,
       number: newQiwiToUse.wallet,
     })
-    console.log(`at onQiwiApiError: set publicKey, secretKey, number via external api`)
+    console.log(`at onQiwiApiError: set callbackUrl, publicKey, secretKey, number via external api`)
 
     const blockedQiwiText = bold(escape(`(${qiwi.wallet} ${id})`))
     const newQiwiText = bold(escape(`(${newQiwiToUse.wallet} ${newQiwiToUseId})`))
