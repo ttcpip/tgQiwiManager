@@ -126,7 +126,7 @@ class Qiwi {
   // #region Top level methods
   /**
    * @returns {Promise<{
-   *  isBanned: bool,
+   *  isBanned: boolean,
    *  restrictions: { restrictionCode: string, restrictionDescription: string}[]
    * }>}
    */
