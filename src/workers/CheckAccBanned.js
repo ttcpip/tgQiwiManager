@@ -50,21 +50,19 @@ class CheckAccBanned {
             Ошибка: ${err.message || err.description || '[no err message]'}
           `
           this.params.settings.data.tgAdminChatIds.forEach((chat) => this.params.tgClient.sendMessage(chat, text).catch(() => {}))
-          return
         }
 
         this.params.settings.data.qiwiAccs[id].lastTimeCheckBanned = Math.trunc(Date.now() / 1000)
         await this.params.settings.save()
 
-        if (!isBanned)
-          return
-
-        const text = dedent`
-          ‼️ Зафиксировано, что кошелек был заблокирован: ${qiwi.wallet} (${id})
-          Ограничения:
-          ${restrictions.map(({ restrictionCode, restrictionDescription }) => `${restrictionCode}: ${restrictionDescription}`).join('\n')}
-        `
-        this.params.settings.data.tgAdminChatIds.forEach((chat) => this.params.tgClient.sendMessage(chat, text).catch(() => {}))
+        if (isBanned && restrictions) {
+          const text = dedent`
+            ‼️ Зафиксировано, что кошелек был заблокирован: ${qiwi.wallet} (${id})
+            Ограничения:
+            ${restrictions.map(({ restrictionCode, restrictionDescription }) => `${restrictionCode}: ${restrictionDescription}`).join('\n')}
+          `
+          this.params.settings.data.tgAdminChatIds.forEach((chat) => this.params.tgClient.sendMessage(chat, text).catch(() => {}))
+        }
       } catch (err) {
         console.error(`When processing is banned. Wallet: ${qiwi.wallet} (${id}): `)
         console.error(err)
