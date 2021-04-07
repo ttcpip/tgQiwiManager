@@ -37,7 +37,22 @@ class CheckAccBanned {
 
     const promises = accsToCheck.map(([id, qiwi]) => Promise.resolve().then(async () => {
       try {
-        const { isBanned, restrictions } = await qiwi.isAccountBanned()
+        let isBanned = null
+        let restrictions = null
+
+        try {
+          const temp = await qiwi.isAccountBanned()
+          isBanned = temp.isBanned
+          restrictions = temp.restrictions
+        } catch (err) {
+          const text = dedent`
+            ‼️ При проверке кошелька ${qiwi.wallet} (${id}) на бан произошла ошибка. Вероятно, аккаунт забанен.
+            Ошибка: ${err.message || err.description || '[no err message]'}
+          `
+          this.params.settings.data.tgAdminChatIds.forEach((chat) => this.params.tgClient.sendMessage(chat, text).catch(() => {}))
+          return
+        }
+
         this.params.settings.data.qiwiAccs[id].lastTimeCheckBanned = Math.trunc(Date.now() / 1000)
         await this.params.settings.save()
 
