@@ -47,4 +47,11 @@ utils.getCircularReplacer = () => {
   }
 }
 
+utils.formatProxyObj = ({
+  ip, host,
+  port,
+  userId, username,
+  password,
+}) => `${ip || host}:${port}@${username || userId}:${password}`
+
 module.exports = utils

@@ -1,4 +1,5 @@
 const fs = require('fs')
+const writeFileAtomic = require('write-file-atomic')
 
 const sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -6,6 +7,8 @@ class Settings {
   constructor(path) {
     this._path = path
     this._canSave = true
+    /** @type {import('../../settings.json')} */
+    this.data = {}
 
     const fileExists = fs.existsSync(path)
 
@@ -36,21 +39,8 @@ class Settings {
    * Writes this.data to the file this._path
    */
   async save() {
-    while (!this._canSave)
-      await sleep(50)
-
-    this._canSave = false
-
-    try {
-      const json = JSON.stringify(this.data, null, 2)
-      await fs.promises.writeFile(this._path, json)
-    } catch (err) {
-      this._canSave = true
-      throw err
-    }
-
-    this._canSave = true
-    return true
+    const json = JSON.stringify(this.data, null, 2)
+    await writeFileAtomic(this._path, json, { encoding: 'utf8', fsync: false })
   }
 
   /**

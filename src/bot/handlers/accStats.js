@@ -3,7 +3,8 @@ const { markdownv2: format } = require('telegram-format')
 const dedent = require('dedent')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const moment = require('../../lib/moment')
-const { userFormatNumber } = require('../../lib/utils')
+const { userFormatNumber, formatProxyObj } = require('../../lib/utils')
+const { updateQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
 
 const { escape, bold, monospace } = format
 const boldEscape = (str) => bold(escape(str))
@@ -46,6 +47,18 @@ module.exports = async function accStatsHandler(ctx) {
     ${boldEscape('Расходы:')} ${monospace(outcomingText)}
   `
   const KB = Markup.inlineKeyboard([[Markup.button.callback('Назад', `statList`)]]).reply_markup
+
+  if (incoming.RUB !== undefined || outgoing.RUB !== undefined) {
+    const obj = {
+      apiToken: qiwi.token,
+      walletNumber: qiwi.wallet,
+      password: id,
+      ...(incoming.RUB !== undefined ? { income: incoming.RUB } : {}),
+      ...(outgoing.RUB !== undefined ? { costs: outgoing.RUB } : {}),
+      proxy: formatProxyObj(qiwi.proxy),
+    }
+    updateQiwiRow(obj).catch((err) => console.error(`Err at updateQiwiRow():`, obj, err))
+  }
 
   return await ctx.editMessageText(text, { reply_markup: KB, parse_mode: 'MarkdownV2' })
 }

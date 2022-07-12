@@ -35,6 +35,7 @@ module.exports.initBot = function initBot(token) {
   bot.action(/changeAutoWithdrawThresholdAndCard=(.+)/, handlers.changeAutoWithdrawThresholdAndCardHandler)
   bot.action('keyPairList', handlers.keyPairListHandler)
   bot.action(/accKeyPair=(.+)/, handlers.accKeyPairHandler)
+  bot.action('actualizeQiwiRows', handlers.actualizeQiwiRowsHandler)
 
   // Defaults
   bot.on('message', Stage.enter('MAIN_MENU_SCENE_ID'))

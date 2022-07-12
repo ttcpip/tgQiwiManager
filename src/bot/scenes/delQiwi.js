@@ -1,6 +1,7 @@
 const { markdownv2: format } = require('telegram-format')
 const dedent = require('dedent')
 const { Scenes, Markup } = require('telegraf')
+const { deleteQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
 
@@ -32,8 +33,12 @@ wizardScene.hears(/✅Всё верно/i, async (ctx) => {
 
   if (!id)
     return await ctx.reply(`Данные устарели, попробуйте снова`, { reply_markup: getKBCancel(true) })
+  if (!qiwiAccsManager.hasById(id))
+    return await ctx.reply(`Не найден аккаунт киви с таким айди`, { reply_markup: getKBCancel(true) })
 
+  const qiwi = qiwiAccsManager.getById(id)
   await qiwiAccsManager.deleteByIdAndSave({ id, settings })
+  deleteQiwiRow(qiwi.wallet).catch((err) => console.error(`Err at deleteQiwiRow():`, qiwi.wallet, err))
 
   await ctx.reply(`✅ Аккаунт успешно удален`, {
     reply_markup: { remove_keyboard: true },

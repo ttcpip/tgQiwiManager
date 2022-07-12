@@ -1,8 +1,9 @@
 const dedent = require('dedent')
 const { Markup } = require('telegraf')
 const { markdownv2: format } = require('telegram-format')
+const { updateQiwiRow, qiwiRowStatuses } = require('../../lib/googleapis/updateQiwiRow')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
-const { userFormatNumber } = require('../../lib/utils')
+const { userFormatNumber, formatProxyObj } = require('../../lib/utils')
 
 /**
  * @param {import('telegraf').Context} ctx
@@ -23,6 +24,17 @@ module.exports = async function walletsBalancesHandler(ctx) {
     const accInfo = `${qiwi.wallet} ${id} ${balanceText || errText}\n`
     accsInfoText += accInfo
     rows.push([Markup.button.callback(`Вывод с ${id}`, `withdraw=${id}`)])
+
+    if (!err) {
+      const obj = {
+        apiToken: qiwi.token,
+        walletNumber: qiwi.wallet,
+        password: id,
+        balance,
+        proxy: formatProxyObj(qiwi.proxy),
+      }
+      updateQiwiRow(obj).catch((err) => console.error(`Err at updateQiwiRow():`, obj, err))
+    }
   }
 
   const total = Object.values(balances).reduce((p, c) => p + c.balance, 0)

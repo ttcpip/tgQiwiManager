@@ -12,4 +12,5 @@ module.exports = {
   changeAutoWithdrawThresholdAndCardHandler: require('./changeAutoWithdrawThresholdAndCard'),
   keyPairListHandler: require('./keyPairList'),
   accKeyPairHandler: require('./accKeyPair'),
+  actualizeQiwiRowsHandler: require('./actualizeQiwiRows'),
 }

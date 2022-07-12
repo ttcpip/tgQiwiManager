@@ -3,8 +3,9 @@ const dedent = require('dedent')
 const { Scenes, Markup } = require('telegraf')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
-const { parseProxyStr } = require('../../lib/utils')
+const { parseProxyStr, formatProxyObj } = require('../../lib/utils')
 const { Qiwi } = require('../../lib/Qiwi')
+const { qiwiRowStatuses, updateQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
 
 const { escape, bold, monospaceBlock } = format
 const boldEscape = (str) => bold(escape(str))
@@ -134,6 +135,7 @@ wizardScene.action(/setForAcc=(.+)/, async (ctx) => {
 
   if (!qiwiAccsManager.hasById(id))
     return await ctx.answerCbQuery(`Не найден аккаунт киви с таким айди`, { show_alert: true })
+  const qiwi = qiwiAccsManager.getById(id)
 
   await qiwiAccsManager.setProxyAndSave({
     id,
@@ -145,6 +147,15 @@ wizardScene.action(/setForAcc=(.+)/, async (ctx) => {
       password,
     },
   })
+  const obj = {
+    apiToken: qiwi.token,
+    walletNumber: qiwi.wallet,
+    password: id,
+    proxy: formatProxyObj({
+      ip, port, username, password,
+    }),
+  }
+  updateQiwiRow(obj).catch((err) => console.error(`Err at updateQiwiRow():`, obj, err))
 
   return await ctx.answerCbQuery(`✅Прокси установлены для аккаунта ${id}`, { show_alert: true })
 })

@@ -20,6 +20,9 @@ wizardScene.enter(async (ctx) => {
         Markup.button.callback('🤖Авто-вывод', 'autoWithdrawList'),
         Markup.button.callback('🧾История', 'historyList=OUT'),
       ],
+      [
+        Markup.button.callback('🔄Актуализировать табличку', 'actualizeQiwiRows'),
+      ],
     ]).reply_markup,
     parse_mode: 'MarkdownV2',
   }

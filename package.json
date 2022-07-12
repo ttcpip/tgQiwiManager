@@ -1,5 +1,5 @@
 {
-  "name": "tgQiwiManager",
+  "name": "tg-qiwi-manager",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js"
@@ -17,10 +17,12 @@
     "chance": "^1.1.7",
     "dedent": "^0.7.0",
     "dotenv": "^8.2.0",
+    "googleapis": "^105.0.0",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.33",
     "socks-proxy-agent": "^5.0.0",
-    "telegraf": "^4.1.0",
-    "telegram-format": "^2.0.1"
+    "telegraf": "^4.8.5",
+    "telegram-format": "^2.0.1",
+    "write-file-atomic": "^4.0.1"
   }
 }

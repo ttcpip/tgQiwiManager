@@ -1,4 +1,5 @@
 require('dotenv').config({ path: '.env' })
+require('./configUtil')
 const config = require('./config')
 const settings = require('./lib/settings').getInstance()
 require('./lib/ExternalApiClient').getInstance({ apiKey: config.externalApiKey })
@@ -46,8 +47,18 @@ const main = async () => {
   checkAccBanned.start()
   console.log(`Check acc banned worker started with interval ${config.checkBannedIntervalMs / 1000}s`)
 
+  const checkQiwiRowsUpdate = new workers.CheckQiwiRowsUpdate({
+    checkQiwiRowsUpdateIntervalMs: config.checkQiwiRowsUpdateIntervalMs,
+    qiwiAccsManager,
+    settings,
+    tgClient,
+  })
+  checkQiwiRowsUpdate.start()
+  console.log(`Check qiwi rows update worker started with interval ${config.checkQiwiRowsUpdateIntervalMs / 1000}s`)
+
   console.log(`↑ Initialization ended after ${Date.now() - startTime}ms ↑`)
 }
+
 main()
   .catch((err) => {
     console.error(`Error at main fn:`)

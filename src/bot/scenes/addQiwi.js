@@ -3,11 +3,10 @@ const dedent = require('dedent')
 const { Scenes, Markup } = require('telegraf')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
-const { parseProxyStr } = require('../../lib/utils')
+const { parseProxyStr, formatProxyObj } = require('../../lib/utils')
+const { createQiwiRow, qiwiRowStatuses } = require('../../lib/googleapis/updateQiwiRow')
 
-const {
-  escape, bold, monospace, monospaceBlock,
-} = format
+const { escape, bold, monospaceBlock } = format
 const boldEscape = (str) => bold(escape(str))
 const wizardScene = new Scenes.BaseScene('ADD_QIWI_SCENE_ID')
 const getKBCancel = (isWithConfirm = false) => {
@@ -65,6 +64,18 @@ wizardScene.hears(/✅Всё верно/i, async (ctx) => {
     reply_markup: { remove_keyboard: true },
     parse_mode: 'MarkdownV2',
   })
+  const obj = {
+    apiToken: token,
+    walletNumber: wallet,
+    balance: '-',
+    costs: '-',
+    income: '-',
+    password: id,
+    proxy: formatProxyObj({
+      ip, port, username, password,
+    }),
+  }
+  createQiwiRow(obj).catch((err) => console.error(`Err at createQiwiRow():`, obj, err))
 
   return await ctx.scene.enter('MAIN_MENU_SCENE_ID')
 })

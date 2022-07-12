@@ -2,3 +2,5 @@ node_modules
 settings.json
 dontTrack
 *.env
+src/lib/googleapis/credentials.json
+src/lib/googleapis/token.json
