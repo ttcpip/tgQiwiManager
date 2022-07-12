@@ -26,7 +26,7 @@ module.exports = async function onQiwiApiError(id, qiwi, requestOptions, error) 
     if (!isAccBlockedError && !isCantSendMoneyError)
       return console.log(`at onQiwiApiError: (!isAccBlockedError && !isCantSendMoneyError), exiting`)
 
-    const [newQiwiToUseId, newQiwiToUse] = giwiAccsManager.getAllAccs().find(([id_, qiwi_]) => {
+    const [newQiwiToUseId, newQiwiToUse] = giwiAccsManager.getAllAccs().find(([id_]) => {
       const info = settings.data.qiwiAccs[id_]
       return id_ !== id
         && id_.includes('Запасной')

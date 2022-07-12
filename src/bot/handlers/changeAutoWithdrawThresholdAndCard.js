@@ -5,7 +5,7 @@ const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
  * @param {Function} next
  */
 module.exports = async function changeAutoWithdrawThresholdAndCardHandler(ctx) {
-  const [_, id] = ctx.match
+  const [, id] = ctx.match
 
   if (!qiwiAccsManager.hasById(id))
     return await ctx.answerCbQuery(`Аккаунт с таким айди не найден`)

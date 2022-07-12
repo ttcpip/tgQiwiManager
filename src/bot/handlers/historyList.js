@@ -6,7 +6,7 @@ const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
  * @param {Function} next
  */
 module.exports = async function historyListHandler(ctx) {
-  const [_, type] = ctx.match
+  const [, type] = ctx.match
 
   const word = type === 'IN'
     ? 'входящую'

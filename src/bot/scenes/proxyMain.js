@@ -5,7 +5,7 @@ const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
 const { parseProxyStr, formatProxyObj } = require('../../lib/utils')
 const { Qiwi } = require('../../lib/Qiwi')
-const { qiwiRowStatuses, updateQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
+const { updateQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
 
 const { escape, bold, monospaceBlock } = format
 const boldEscape = (str) => bold(escape(str))

@@ -12,7 +12,7 @@ const tgClient = require('../tgClient')
  * @param {number=} withdrawInfo.amount
  * @param {string=} withdrawInfo.card
  */
-module.exports = async function onWithdraw(id, qiwi, withdrawInfo) {
+module.exports = async function onWithdraw(id, qiwi) {
   try {
     const startDate = moment().tz('Europe/Moscow').startOf('month')
     const endDate = moment().tz('Europe/Moscow').endOf('month')

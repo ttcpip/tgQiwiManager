@@ -4,7 +4,7 @@ const { Scenes, Markup } = require('telegraf')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
 const { parseProxyStr, formatProxyObj } = require('../../lib/utils')
-const { createQiwiRow, qiwiRowStatuses } = require('../../lib/googleapis/updateQiwiRow')
+const { createQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
 
 const { escape, bold, monospaceBlock } = format
 const boldEscape = (str) => bold(escape(str))

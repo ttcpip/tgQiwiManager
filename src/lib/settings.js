@@ -1,8 +1,6 @@
 const fs = require('fs')
 const writeFileAtomic = require('write-file-atomic')
 
-const sleep = async (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
 class Settings {
   constructor(path) {
     this._path = path

@@ -3,7 +3,6 @@ const { markdownv2: format } = require('telegram-format')
 const dedent = require('dedent')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
-const { userFormatNumber } = require('../../lib/utils')
 
 const { escape, bold, monospace } = format
 const boldEscape = (str) => bold(escape(str))
@@ -13,7 +12,7 @@ const boldEscape = (str) => bold(escape(str))
  * @param {Function} next
  */
 module.exports = async function accAutoWithdrawHandler(ctx) {
-  const [_, id] = ctx.match
+  const [, id] = ctx.match
 
   if (!qiwiAccsManager.hasById(id))
     return await ctx.answerCbQuery(`Аккаунт с таким айди не найден`)

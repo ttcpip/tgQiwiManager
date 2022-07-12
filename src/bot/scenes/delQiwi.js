@@ -5,7 +5,7 @@ const { deleteQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
 
-const { escape, bold, monospace } = format
+const { escape, bold } = format
 const boldEscape = (str) => bold(escape(str))
 const wizardScene = new Scenes.BaseScene('DEL_QIWI_SCENE_ID')
 const getKBCancel = (isWithConfirm = false) => {

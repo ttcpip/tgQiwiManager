@@ -211,7 +211,7 @@ class QiwiAccsManager {
   async getAllBalances() {
     const accs = this.getAllAccs()
     const result = {}
-    for (const [id, qiwi] of accs)
+    for (const [id] of accs)
       result[id] = { balance: 0, err: null }
 
     await Promise.all(accs.map(async ([id, qiwi]) => {

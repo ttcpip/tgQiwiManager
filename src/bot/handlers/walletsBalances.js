@@ -1,7 +1,7 @@
 const dedent = require('dedent')
 const { Markup } = require('telegraf')
 const { markdownv2: format } = require('telegram-format')
-const { updateQiwiRow, qiwiRowStatuses } = require('../../lib/googleapis/updateQiwiRow')
+const { updateQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const { userFormatNumber, formatProxyObj } = require('../../lib/utils')
 

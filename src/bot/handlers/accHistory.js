@@ -13,7 +13,7 @@ const boldEscape = (str) => bold(escape(str))
  * @param {Function} next
  */
 module.exports = async function accHistoryHandler(ctx) {
-  const [_, id, _type] = ctx.match
+  const [, id, _type] = ctx.match
   const type = ['IN', 'OUT', 'ALL'].includes(_type) ? _type : 'ALL'
   const rows = 10
 

@@ -1,13 +1,8 @@
-const { markdownv2: format } = require('telegram-format')
-const dedent = require('dedent')
 const { Scenes, Markup } = require('telegraf')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const settings = require('../../lib/settings').getInstance()
-const { Qiwi } = require('../../lib/Qiwi')
 const accAutoWithdrawHandler = require('../handlers/accAutoWithdraw')
 
-const { escape, bold, monospace } = format
-const boldEscape = (str) => bold(escape(str))
 const wizardScene = new Scenes.BaseScene('CHANGE_AUTO_WITHDRAW_THRESHOLD_AND_CARD_SCENE_ID')
 const getKBCancel = (isWithConfirm = false) => {
   const rows = !isWithConfirm

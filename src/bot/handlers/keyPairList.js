@@ -1,5 +1,4 @@
 const { Markup } = require('telegraf')
-const { markdownv2: format } = require('telegram-format')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 
 /**

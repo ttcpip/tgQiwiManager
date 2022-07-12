@@ -230,8 +230,8 @@ class Qiwi {
   getCurrencyNameById(currId) {
     return Object
       .entries(this.currencyCode)
-      .filter(([code, id]) => id === currId)
-      .map(([code, id]) => code)[0] || `${currId}`
+      .filter(([, id]) => id === currId)
+      .map(([code]) => code)[0] || `${currId}`
   }
   // #endregion
 
