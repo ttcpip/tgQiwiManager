@@ -1,4 +1,6 @@
-const { updateQiwiRow, qiwiRowStatuses } = require('../lib/googleapis/updateQiwiRow')
+const {
+  updateQiwiRow, qiwiRowStatuses, getNewQiwiRowStatusByErr, buildLastErrField,
+} = require('../lib/googleapis/updateQiwiRow')
 const moment = require('../lib/moment')
 const TaskLoop = require('../lib/TaskLoop')
 const { formatProxyObj } = require('../lib/utils')
@@ -82,15 +84,11 @@ class CheckQiwiRowsUpdate {
         updatingFields.balance = balance
         await updateQiwiRow(updatingFields).catch(onUpdateErrFn)
       } catch (err) {
-        const m = (err?.message || '').toLowerCase()
-
         const updatingFields = {
           walletNumber: qiwi.wallet,
-          status: qiwiRowStatuses.ban,
-          lastErr: `${moment().tz('Europe/Moscow').format('DD.MM.YYYY HH:mm')} — ${(err?.message || '')}`,
+          status: getNewQiwiRowStatusByErr(err),
+          lastErr: buildLastErrField(err),
         }
-        if (m.includes('proxy') || m.includes('socks5'))
-          updatingFields.status = qiwiRowStatuses.proxy
 
         await updateQiwiRow(updatingFields).catch(getOnUpdateErrFn(updatingFields))
       }

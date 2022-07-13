@@ -1,7 +1,7 @@
 const dedent = require('dedent')
 const { Markup } = require('telegraf')
 const { markdownv2: format } = require('telegram-format')
-const { updateQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
+const { updateQiwiRow, buildLastErrField, getNewQiwiRowStatusByErr } = require('../../lib/googleapis/updateQiwiRow')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const { userFormatNumber, formatProxyObj } = require('../../lib/utils')
 
@@ -31,6 +31,16 @@ module.exports = async function walletsBalancesHandler(ctx) {
         walletNumber: qiwi.wallet,
         password: id,
         balance,
+        proxy: formatProxyObj(qiwi.proxy),
+      }
+      updateQiwiRow(obj).catch((err) => console.error(`Err at updateQiwiRow():`, obj, err))
+    } else {
+      const obj = {
+        apiToken: qiwi.token,
+        walletNumber: qiwi.wallet,
+        password: id,
+        lastErr: buildLastErrField(err),
+        status: getNewQiwiRowStatusByErr(err),
         proxy: formatProxyObj(qiwi.proxy),
       }
       updateQiwiRow(obj).catch((err) => console.error(`Err at updateQiwiRow():`, obj, err))

@@ -1,3 +1,4 @@
+const moment = require('../moment')
 const { sheets } = require('.')
 const config = require('../../config')
 
@@ -126,11 +127,27 @@ async function deleteQiwiRow(walletNumber) {
   console.log(`deleteQiwiRow() done: `, { walletNumber })
 }
 
+/** @param {Error} err */
+function getNewQiwiRowStatusByErr(err) {
+  const m = (err?.message || '').toLowerCase()
+  if (m.includes('proxy') || m.includes('socks5'))
+    return qiwiRowStatuses.proxy
+  return qiwiRowStatuses.ban
+}
+
+/** @param {Error} err */
+function buildLastErrField(err) {
+  return `${moment().tz('Europe/Moscow').format('DD.MM.YYYY HH:mm')} — ${(err?.message || '')}`
+}
+
 module.exports = {
   updateQiwiRow,
   createQiwiRow,
   deleteQiwiRow,
   qiwiRowStatuses,
+
+  getNewQiwiRowStatusByErr,
+  buildLastErrField,
 }
 
 /**
