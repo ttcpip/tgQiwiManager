@@ -61,12 +61,15 @@ class CheckQiwiRowsUpdate {
         const costs = stats?.outgoing.RUB || 0
         /** @type {import('../lib/googleapis/updateQiwiRow').QiwiRowFields} */
 
+        const balance = await qiwi.getRubAccBalance()
+
         const updatingFields = {
           walletNumber: qiwi.wallet,
           income,
           costs,
           apiToken: qiwi.token,
           password: id,
+          balance,
           proxy: formatProxyObj(qiwi.proxy),
           status: qiwiRowStatuses.limit,
         }
@@ -79,9 +82,7 @@ class CheckQiwiRowsUpdate {
         if (restrictions.length > 0)
           throw new Error(`Account banned, restrictions: ${restrictions.map(({ restrictionCode, restrictionDescription }) => `${restrictionCode}: ${restrictionDescription}`).join(', ')}`)
 
-        const balance = await qiwi.getRubAccBalance()
         updatingFields.status = qiwiRowStatuses.work
-        updatingFields.balance = balance
         await updateQiwiRow(updatingFields).catch(onUpdateErrFn)
       } catch (err) {
         const updatingFields = {
