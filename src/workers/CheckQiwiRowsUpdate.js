@@ -73,7 +73,7 @@ class CheckQiwiRowsUpdate {
           proxy: formatProxyObj(qiwi.proxy),
           status: qiwiRowStatuses.limit,
         }
-        const onUpdateErrFn = getOnUpdateErrFn(updateQiwiRow)
+        const onUpdateErrFn = getOnUpdateErrFn(updatingFields)
 
         if (costs > 190000)
           return await updateQiwiRow(updatingFields).catch(onUpdateErrFn)
