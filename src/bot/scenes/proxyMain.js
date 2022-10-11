@@ -51,9 +51,9 @@ wizardScene.enter(async (ctx) => {
     }]) => `${wallet} (${id}) ${host}:${port}@${userId}:${password}`)
     .join('\n')
 
-  const arr = smartChunkStr(`${escape('Текущие прокси:')}\n${monospaceBlock(proxiesText)}`, 4096)
+  const arr = smartChunkStr(`${'Текущие прокси:'}\n${proxiesText}`, 4096)
   for (let i = 0; i < arr.length; i++)
-    await ctx.reply(arr[i], { parse_mode: 'MarkdownV2' })
+    await ctx.reply(arr[i])
 
   return await ctx.replyWithMarkdownV2(promptProxyText, { reply_markup: getKBCancel() })
 })

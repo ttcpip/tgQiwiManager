@@ -8,7 +8,7 @@ const { client_secret, client_id, redirect_uris } = credentials.installed
 const oAuth2Client = new google.auth.OAuth2(
   client_id, client_secret, redirect_uris[0],
 )
-oAuth2Client.setCredentials({ access_token: 'd82005bf23133cce283ef08069d8ff31a90ece82' })
+oAuth2Client.setCredentials(token)
 
 const sheets = google.sheets({ version: 'v4', auth: oAuth2Client })
 

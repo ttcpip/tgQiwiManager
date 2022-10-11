@@ -11,7 +11,7 @@ module.exports = async function walletsListHandler(ctx) {
   const accsInfo = qiwiAccsManager.getAllAccs()
     .map(([id, qiwi], i) => `${i + 1}) ${qiwi.wallet} ${id}`)
     .join('\n')
-  const text = `📋 Аккаунты:\n${format.monospaceBlock(accsInfo)}`
+  const text = `📋 Аккаунты:\n${accsInfo}`
   const KB = Markup.inlineKeyboard([
     [Markup.button.callback('Добавить киви', '*delKb*addQiwi')],
     [Markup.button.callback('Удалить киви', '*delKb*delQiwi')],
@@ -23,9 +23,9 @@ module.exports = async function walletsListHandler(ctx) {
   const arr = smartChunkStr(text, 4096)
   for (let i = 0; i < arr.length; i++) {
     if (i === arr.length - 1)
-      await ctx.reply(arr[i], { reply_markup: KB, parse_mode: 'MarkdownV2' })
+      await ctx.reply(arr[i], { reply_markup: KB })
     else
-      await ctx.reply(arr[i], { parse_mode: 'MarkdownV2' })
+      await ctx.reply(arr[i])
   }
 
   return true

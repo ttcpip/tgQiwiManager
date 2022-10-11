@@ -50,9 +50,9 @@ module.exports = async function walletsBalancesHandler(ctx) {
 
   const total = Object.values(balances).reduce((p, c) => p + c.balance, 0)
   const text = dedent`
-    ${format.bold('💰 Балансы: ')}
+    ${'💰 Балансы: '}
       
-    ${format.monospaceBlock(accsInfoText)}${format.monospaceBlock(`Всего: ${userFormatNumber(total)} руб.`)}
+    ${accsInfoText}${`Всего: ${userFormatNumber(total)} руб.`}
   `
   const KB = Markup.inlineKeyboard([
     ...rows,
@@ -63,9 +63,9 @@ module.exports = async function walletsBalancesHandler(ctx) {
   const arr = smartChunkStr(text, 4096)
   for (let i = 0; i < arr.length; i++) {
     if (i === arr.length - 1)
-      await ctx.reply(arr[i], { reply_markup: KB, parse_mode: 'MarkdownV2' })
+      await ctx.reply(arr[i], { reply_markup: KB })
     else
-      await ctx.reply(arr[i], { parse_mode: 'MarkdownV2' })
+      await ctx.reply(arr[i])
   }
 
   return true
