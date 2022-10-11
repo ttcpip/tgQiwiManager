@@ -6,6 +6,7 @@ const settings = require('../../lib/settings').getInstance()
 const { parseProxyStr, formatProxyObj } = require('../../lib/utils')
 const { Qiwi } = require('../../lib/Qiwi')
 const { updateQiwiRow } = require('../../lib/googleapis/updateQiwiRow')
+const { smartChunkStr } = require('../../helpers/smartChunkStr')
 
 const { escape, bold, monospaceBlock } = format
 const boldEscape = (str) => bold(escape(str))
@@ -50,7 +51,10 @@ wizardScene.enter(async (ctx) => {
     }]) => `${wallet} (${id}) ${host}:${port}@${userId}:${password}`)
     .join('\n')
 
-  await ctx.replyWithMarkdownV2(`${escape('Текущие прокси:')}\n${monospaceBlock(proxiesText)}`)
+  const arr = smartChunkStr(`${escape('Текущие прокси:')}\n${monospaceBlock(proxiesText)}`, 4096)
+  for (let i = 0; i < arr.length; i++)
+    await ctx.reply(arr[i], { parse_mode: 'MarkdownV2' })
+
   return await ctx.replyWithMarkdownV2(promptProxyText, { reply_markup: getKBCancel() })
 })
 

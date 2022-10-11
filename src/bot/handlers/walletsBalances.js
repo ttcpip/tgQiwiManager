@@ -1,6 +1,7 @@
 const dedent = require('dedent')
 const { Markup } = require('telegraf')
 const { markdownv2: format } = require('telegram-format')
+const { smartChunkStr } = require('../../helpers/smartChunkStr')
 const { updateQiwiRow, buildLastErrField, getNewQiwiRowStatusByErr } = require('../../lib/googleapis/updateQiwiRow')
 const qiwiAccsManager = require('../../lib/QiwiAccsManager').getInstance()
 const { userFormatNumber, formatProxyObj } = require('../../lib/utils')
@@ -58,5 +59,14 @@ module.exports = async function walletsBalancesHandler(ctx) {
     [Markup.button.callback('Назад', `mainMenu`)],
   ]).reply_markup
 
-  return await ctx.editMessageText(text, { reply_markup: KB, parse_mode: 'MarkdownV2' })
+  ctx.answerCbQuery().catch(() => {})
+  const arr = smartChunkStr(text, 4096)
+  for (let i = 0; i < arr.length; i++) {
+    if (i === arr.length - 1)
+      await ctx.reply(arr[i], { reply_markup: KB, parse_mode: 'MarkdownV2' })
+    else
+      await ctx.reply(arr[i], { parse_mode: 'MarkdownV2' })
+  }
+
+  return true
 }
