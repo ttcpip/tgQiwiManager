@@ -1,6 +1,7 @@
 const moment = require('../moment')
 const { sheets } = require('.')
 const config = require('../../config')
+const Settings = require('../settings')
 
 const qiwiRowStatuses = {
   work: 'Ворк',
@@ -24,6 +25,8 @@ const qiwiRowsTableRange = 'A6:I'
 
 /** @param {QiwiRowFields} fields */
 async function updateQiwiRow(fields) {
+  if (Settings.getInstance().data.mockQiwiRowsActions) return
+
   // find existing row with the given wallet
   const resp = await sheets.spreadsheets.values.get({
     spreadsheetId: config.qiwiGoogleSpreadsheetId,
@@ -59,6 +62,8 @@ async function updateQiwiRow(fields) {
 
 /** @param {QiwiRowFields} fields */
 async function createQiwiRow(fields) {
+  if (Settings.getInstance().data.mockQiwiRowsActions) return
+
   // find existing row with the given wallet
   const resp = await sheets.spreadsheets.values.get({
     spreadsheetId: config.qiwiGoogleSpreadsheetId,
@@ -97,6 +102,8 @@ async function createQiwiRow(fields) {
 
 /** @param {string} walletNumber */
 async function deleteQiwiRow(walletNumber) {
+  if (Settings.getInstance().data.mockQiwiRowsActions) return
+
   // find existing row with the given wallet
   const resp = await sheets.spreadsheets.values.get({
     spreadsheetId: config.qiwiGoogleSpreadsheetId,
